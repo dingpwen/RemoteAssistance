@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Remote Assistance Application</string>
+    <string name="title_activity_friend_list">FriendListActivity</string>
+    <string name="error_msg_net">NetWork cannot be connected</string>
+    <string name="error_msg_json">A json string is need </string>
+    <string name="error_msg_add">Fail to add a friend</string>
+    <string name="error_msg_del">Fail to delete a friend</string>
+</resources>
