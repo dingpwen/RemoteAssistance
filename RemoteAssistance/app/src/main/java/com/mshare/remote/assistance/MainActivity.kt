@@ -19,7 +19,6 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import kotlin.collections.HashMap
 
-
 class MainActivity : AppCompatActivity() {
     private lateinit var mRemoteImg:ImageView
     private var mGoalToken:String? = null
@@ -28,12 +27,12 @@ class MainActivity : AppCompatActivity() {
     private val mHandler = MainHadler(this@MainActivity)
 
     companion object{
-        const val MSG_RETRY = 0x121
-        const val MSG_INVALD = 0x122
-        const val MSG_ERROR = 0x123
-        const val RETRY_DURING:Long = 1000
+        private const val MSG_RETRY = 0x121
+        private const val MSG_INVALD = 0x122
+        private const val MSG_ERROR = 0x123
+        private const val RETRY_DURING:Long = 1000
 
-        class MainHadler(activity:MainActivity):Handler() {
+        private class MainHadler(activity:MainActivity):Handler() {
             private val mActivity = WeakReference<MainActivity>(activity)
             override fun handleMessage(msg: Message) {
                 super.handleMessage(msg)
@@ -80,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    inner class MainWebSocketListener: WebSocketListener() {
+    private inner class MainWebSocketListener: WebSocketListener() {
         private var mWebSocket: WebSocket? = null
         private var mOpened = false
         override fun onOpen(webSocket: WebSocket, response: Response) {

@@ -2,6 +2,7 @@ from abc import ABC
 
 from tornado.websocket import WebSocketHandler, WebSocketClosedError
 import json
+from libs.encode import Encode
 
 clients = dict()
 
@@ -13,8 +14,8 @@ class WebSocketServerHandler(WebSocketHandler, ABC):
     def open(self, *args, **kwargs):
         self.token = self.get_arguments("token")[0]
         print("connect token:", self.token)
-        if self.token is None:
-            self.close(1002, "token is none")
+        if (self.token is None) or (Encode.check(self.token) is False):
+            self.close(1002, "token is none or invalid")
             return
         clients[self.token] = {"token": self.token, "object": self}
         self.set_nodelay(True)

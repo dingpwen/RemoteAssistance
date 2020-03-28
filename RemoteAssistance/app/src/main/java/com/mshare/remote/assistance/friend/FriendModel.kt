@@ -49,4 +49,14 @@ class FriendModel:Contact.IModel {
             }
         }
     }
+
+    override fun addUser(params: Map<*, *>, callback: Callback, type:Int) {
+        when(type) {
+            1 -> basePost(Constants.getUserRegisterUrl(), params, callback)
+            2 -> basePost(Constants.getUserAddUrl(), params, callback)
+            else -> {
+                return
+            }
+        }
+    }
 }

@@ -5,4 +5,5 @@
     <string name="error_msg_json">A json string is need </string>
     <string name="error_msg_add">Fail to add a friend</string>
     <string name="error_msg_del">Fail to delete a friend</string>
+    <string name="error_invalid_code">Qrcode is invalid</string>
 </resources>

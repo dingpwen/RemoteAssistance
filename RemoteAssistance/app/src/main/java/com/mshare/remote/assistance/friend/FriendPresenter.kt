@@ -90,4 +90,20 @@ class FriendPresenter:Contact.IPresenter {
 
         }, type)
     }
+
+    override fun addUser(token: String) {
+        val map = HashMap<String, String>()
+        map[Constants.WS_MSG_TOKEN_SELF] = token
+        map[Constants.USER_TOKEN_CATEGORY] = "2"
+        mModel.addUser(map,object:Callback{
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("wenpd", "IOException", e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                Log.e("wenpd", "onResponse:${response.message}")
+            }
+
+        }, 2)
+    }
 }

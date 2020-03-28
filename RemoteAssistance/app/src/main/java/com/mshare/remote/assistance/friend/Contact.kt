@@ -10,6 +10,7 @@ interface Contact {
     interface IModel{
         fun loadData(params:Map<*, *>, callback:Callback)
         fun addOrRemoveFriend(params:Map<*, *>, callback:Callback, type:Int)
+        fun addUser(params:Map<*, *>, callback:Callback, type:Int)
     }
 
     interface IPresenter{
@@ -17,5 +18,6 @@ interface Contact {
         fun detachView()
         fun loadData(token:String)
         fun addOrRemoveFriend(token:String, friendToken:String, type:Int)
+        fun addUser(token:String)
     }
 }

@@ -48,7 +48,13 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         mPresenter.attachView(this)
 
         initListView()
-        mPresenter.loadData(Constants.getUserToken(this))
+        var token = Constants.getUserToken(this, false)
+        if(token == "") {
+            token = Constants.getUserToken(this, true)
+            mPresenter.addUser(token)
+        } else {
+            mPresenter.loadData(token)
+        }
 
         fab.setOnClickListener {
             scanForAdd()
@@ -79,6 +85,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
             Constants.ERROR_TYPE_JSON -> getString(R.string.error_msg_json)
             Constants.ERROR_TYPE_ADD -> getString(R.string.error_msg_add)
             Constants.ERROR_TYPE_DEL -> getString(R.string.error_msg_del)
+            Constants.ERROR_INVALID_TOKEN -> getString(R.string.error_invalid_code)
             else -> {
                 return
             }
@@ -105,6 +112,8 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
                 val token = data?.extras?.getString ("qr_scan_result")?:return
                 if(Constants.checkUserToken(token)) {
                     mPresenter.addOrRemoveFriend(Constants.getUserToken(this), token, 1)
+                } else {
+                    onError(Constants.ERROR_INVALID_TOKEN)
                 }
             }
         }
