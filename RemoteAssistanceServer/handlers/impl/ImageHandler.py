@@ -10,10 +10,13 @@ from settings.config import max_img_size
 
 
 class ImageHandler(RequestHandler, ABC):
+    @check_token
     async def get(self, *args, **kwargs):
         url = self.request.uri
-        if url.startswith("/image/") and url.endswith(".jpg"):
-            file_name = 'static/upload/{}'.format(url[7:])
+        image_url = self.get_query_argument("image")
+        if url.startswith("/image/get") and image_url is not None:
+            file_name = 'static/upload/{}'.format(image_url)
+            print("image:", file_name)
             await self.download(file_name)
             pass
         else:
@@ -24,14 +27,19 @@ class ImageHandler(RequestHandler, ABC):
     async def post(self):
         url = self.request.uri
         token = self.get_body_argument('token')
+        result = dict()
         if url.startswith("/image/upload"):
             image = self.get_body_argument('image')
             image_data = Encode.decode(image)
+            if image_data is None:
+                result["status"] = 404
+                result["msg"] = "image data is invalid"
+                self.write(json.dumps(result))
+                return
             ut = int(time.time())
             file_name = token + str(ut) + ".jpg"
             save_to = 'static/upload/{}'.format(file_name)
             await self.upload(image_data, save_to)
-            result = dict()
             result["status"] = 200
             result["imageUrl"] = file_name
             self.write(json.dumps(result))

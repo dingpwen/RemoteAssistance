@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.text.TextUtils
 import android.util.Base64
 import android.util.Log
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -16,8 +17,8 @@ import java.util.concurrent.TimeUnit
 object Constants{
     const val DEBUG_MODE = true
     const val SHARES_FILE = "assistance"
-    //private const val SERVER_LOCAL_BASE = "://192.168.0.109:5000/"
-    private const val SERVER_LOCAL_BASE = "://172.16.200.206:5000/"
+    private const val SERVER_LOCAL_BASE = "://192.168.0.109:5000/"
+    //private const val SERVER_LOCAL_BASE = "://172.16.200.206:5000/"
     private const val SERVER_REMOTE_BASE = "://mshare.frp1.chuantou.org:58000/"
     private const val WS_SERVER_LOCAL:String = "ws"+ SERVER_LOCAL_BASE + "socket"
     private const val WS_SERVER_REMOTE:String = "ws"+ SERVER_REMOTE_BASE + "socket"
@@ -38,6 +39,15 @@ object Constants{
         return if(DEBUG_MODE) WS_SERVER_LOCAL else WS_SERVER_REMOTE
     }
 
+    private fun addParamToUrl(url:String, params:Map<*, *>):String{
+        val httpUrl: HttpUrl.Builder = url.toHttpUrlOrNull()?.newBuilder()
+                ?: return ""
+        for(entry in params.entries){
+            httpUrl.addQueryParameter(entry.key as String,entry.value as String)
+        }
+        return httpUrl.build().toString()
+    }
+
     fun createWebSocket(webUrl: String, wsl: WebSocketListener, params: Map<String, String>)  {
         if(TextUtils.isEmpty(webUrl)) {
             return
@@ -46,17 +56,8 @@ object Constants{
             .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
             .connectTimeout(CONN_TIMEOUT, TimeUnit.SECONDS)
             .build()
-        var url:String? = null
-        val map = HashMap<String, String>(params)
-        for(entry in map.entries){
-            if(url == null) {
-                url = "?${entry.key}=${entry.value}"
-            } else {
-                url = "&${entry.key}=${entry.value}"
-            }
-        }
-        url = webUrl + url
-        Log.d("wenpd", "createWebSocket:$url")
+        var url:String = addParamToUrl("http://localhost/test", params)
+        url = url.replace("http://localhost/test", webUrl)
         val request = Request.Builder().url(url).build()
         httpClient.newWebSocket(request, wsl)
         httpClient.dispatcher.executorService.shutdown()
@@ -67,6 +68,7 @@ object Constants{
     private const val HTTP_SERVER_REMOTE = "http"+ SERVER_REMOTE_BASE
     private const val URL_FRIEND_BASE = "friend"
     private const val URL_USER_BASE = "user"
+    private const val URL_IMAGE_BASE = "image"
     const val MEDIA_TYPE_JSON = "application/json"
     private const val USER_TOKEN_FIX = "wveinwpadlakm@I"
     private const val USER_TOKEN_POS = 10
@@ -98,6 +100,15 @@ object Constants{
 
     fun getUserRegisterUrl():String {
         return getServerHost() + URL_USER_BASE + "/register"
+    }
+
+    fun getImageUrl(context: Context, url:String):String {
+        val token = getUserToken(context);
+        val hostUrl = getServerHost() + URL_IMAGE_BASE + "/get"
+        val map = HashMap<String, String>()
+        map["token"] = token
+        map["image"] = url
+        return addParamToUrl(hostUrl, map)
     }
 
     private fun generateUserToken():String{

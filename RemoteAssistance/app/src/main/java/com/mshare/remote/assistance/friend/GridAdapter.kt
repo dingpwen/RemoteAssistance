@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.MainActivity
 
 class GridAdapter(context: Context): RecyclerView.Adapter<GridAdapter.GridViewHolder>() {
@@ -38,10 +39,12 @@ class GridAdapter(context: Context): RecyclerView.Adapter<GridAdapter.GridViewHo
             holder.title.text = friend.name
         }
         if(friend.imageUrl.isEmpty() || friend.imageUrl == "none") {
-            holder.image.setImageResource(R.drawable.default_img)
+            //holder.image.setImageResource(R.drawable.default_img)
+            val imgUrl = Constants.getImageUrl(mContext, "default.jpg")
+            Glide.with(mContext).load(imgUrl).placeholder(R.drawable.default_img).into(holder.image)
         } else {
-            holder.image.setImageResource(R.drawable.default_img)
-            Glide.with(mContext).load(friend.imageUrl).into(holder.image)
+            val imgUrl = Constants.getImageUrl(mContext, friend.imageUrl)
+            Glide.with(mContext).load(imgUrl).placeholder(R.drawable.default_img).into(holder.image)
         }
         holder.itemView.setOnClickListener {
             val intent = Intent(mContext,MainActivity::class.java);
