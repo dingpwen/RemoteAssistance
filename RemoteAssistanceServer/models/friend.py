@@ -44,7 +44,10 @@ class FriendModel:
             count = session.query(func.count(Friend.id)).filter(Friend.token == token).scalar()
             if count > max_helpers:
                 return -2, None
-        category = session.query(User).filter(User.token == ftk).first().category
+        user = session.query(User).filter(User.token == ftk).first()
+        if user is None:
+            return -3, None
+        category = user.category
         if category == 2:
             count = session.query(func.count(Friend.id)).filter(Friend.ftk == ftk, Friend.category == 2).scalar()
             if count > max_helpers:
@@ -55,3 +58,7 @@ class FriendModel:
         session.commit()
         friend = session.query(Friend).filter(Friend.ftk == ftk, Friend.token == token).first()
         return 0, friend
+
+    @staticmethod
+    async def update_token(old_token, new_token):
+        session.query(Friend).filter(Friend.ftk == old_token).update({Friend.ftk: new_token})

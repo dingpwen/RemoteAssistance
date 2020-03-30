@@ -3,11 +3,12 @@ from tornado import httpserver, ioloop
 from tornado.options import define, options
 from handlers.urls import handlers
 from settings.config import settings
+from libs.db import init_db
 '''from libs.encode import Encode'''
 
 define("port", default=5000, help="server port", type=int)
 define("start", default=True, help="run server", type=bool)
-
+init_db()
 
 if __name__ == "__main__":
     options.parse_command_line()

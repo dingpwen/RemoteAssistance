@@ -34,7 +34,7 @@ class FriendPresenter:Contact.IPresenter {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val result = response.message
+                val result = response.body!!.string()
                 try {
                     val obj = JSONObject(result)
                     val status = obj.getInt("status")
@@ -69,7 +69,7 @@ class FriendPresenter:Contact.IPresenter {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val result = response.message
+                val result = response.body!!.string()
                 try {
                     val obj = JSONObject(result)
                     val status = obj.getInt("status")

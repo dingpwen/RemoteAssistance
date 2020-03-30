@@ -1,5 +1,5 @@
 from abc import ABC
-from tornado.web import RequestHandler
+from handlers.base.BaseHandler import BaseHandler
 from libs.hooks import check_token
 from libs.encode import Encode
 import time
@@ -9,7 +9,7 @@ from PIL import Image
 from settings.config import max_img_size
 
 
-class ImageHandler(RequestHandler, ABC):
+class ImageHandler(BaseHandler, ABC):
     @check_token
     async def get(self, *args, **kwargs):
         url = self.request.uri
@@ -20,11 +20,10 @@ class ImageHandler(RequestHandler, ABC):
             await self.download(file_name)
             pass
         else:
-            self.write("Invalid path ")
-            self.write_error(404)
+            await self.send_invalid_path()
 
     @check_token
-    async def post(self):
+    async def post(self, *args, **kwargs):
         url = self.request.uri
         token = self.get_body_argument('token')
         result = dict()
@@ -44,7 +43,7 @@ class ImageHandler(RequestHandler, ABC):
             result["imageUrl"] = file_name
             self.write(json.dumps(result))
         else:
-            self.write_error(404)
+            await self.send_invalid_path()
 
     async def download(self, file_name):
         try:
