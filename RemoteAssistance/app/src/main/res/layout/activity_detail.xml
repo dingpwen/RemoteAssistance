@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.user.DetailActivity">
+
+    <TextView
+        android:id="@+id/name_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:padding="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/detail_name_title"
+        />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:padding="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/name_title"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/detail_name_content"
+        />
+
+    <EditText
+        android:id="@+id/name_edit"
+        android:hint="@string/detail_name_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:padding="8dp"
+        android:inputType="text"
+        app:layout_constraintLeft_toRightOf="@+id/name_title"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        />
+
+
+    <TextView
+        android:id="@+id/image_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:padding="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/name_title"
+        android:text="@string/detail_image_title"
+        />
+
+    <ImageView
+        android:id="@+id/image"
+        android:contentDescription="@string/friend_img_dsc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:padding="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/name_title"
+        app:layout_constraintTop_toBottomOf="@+id/name_title"
+        android:src="@drawable/default_img"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout >

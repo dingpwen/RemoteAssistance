@@ -12,7 +12,7 @@ class User(Base):
     number = Column(String(20))
     password = Column(String(50))
     token = Column(String(100))
-    image = Column(String(50))
+    image = Column(String(100))
     # 1:visual impaired 2: helper
     category = Column(Integer)
     rt = Column(String(20))
@@ -48,13 +48,13 @@ class UserModel:
         return 0, user
 
     @staticmethod
-    def reg_user(name, number, password, image, category):
+    def reg_user(number, password, category):
         user = session.query(User).filter(User.number == number).first()
         if user is not None:
             return -1, user
         rt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         token = Encode.generate_token()
-        user = User(name, number, password, token, image, category, rt, rt)
+        user = User("", number, password, token, "", category, rt, rt)
         session.add(user)
         session.commit()
         user = session.query(User).filter(User.token == token).first()
@@ -67,9 +67,16 @@ class UserModel:
     @staticmethod
     def get_reg_user(number, password):
         user = session.query(User).filter(User.number == number, User.password == password).first()
+        otk = user.token
         if user is not None:
-            otk = user.token
             user.token = Encode.generate_token()
             user.lt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             session.query(User).filter(User.number == number).update({User.token: user.token, User.lt: user.lt})
-        return user
+            session.commit()
+        return otk, user
+
+    @staticmethod
+    def update_user(token, name, image):
+        session.query(User).filter(User.token == token).update({User.name: name, User.image: image})
+        session.commit()
+        return session.query(User).filter(User.token == token).first()

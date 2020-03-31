@@ -31,7 +31,7 @@ object Constants{
     const val USER_TOKEN_CATEGORY:String = "category"
     const val DATA_TYPE_IMAGE:Byte = 0
     const val DATA_TYPE_AUDIO:Byte = 1
-    const val WS_CONN_RETRY_TIMES = 5;
+    const val WS_CONN_RETRY_TIMES = 5
     private const val READ_TIMEOUT:Long = 5
     private const val CONN_TIMEOUT:Long = 5
 
@@ -76,6 +76,7 @@ object Constants{
     const val ERROR_TYPE_JSON = -2
     const val ERROR_TYPE_ADD = -3
     const val ERROR_TYPE_DEL = -4
+    const val ERROR_TYPE_COMM = -5
     const val ERROR_INVALID_TOKEN = -6
 
     private fun getServerHost():String{
@@ -94,6 +95,10 @@ object Constants{
         return getServerHost() + URL_FRIEND_BASE + "/delete"
     }
 
+    fun getUserLoginUrl():String {
+        return getServerHost() + URL_USER_BASE + "/login"
+    }
+
     fun getUserAddUrl():String {
         return getServerHost() + URL_USER_BASE + "/add"
     }
@@ -102,13 +107,38 @@ object Constants{
         return getServerHost() + URL_USER_BASE + "/register"
     }
 
+    fun getUserUpdateUrl():String {
+        return getServerHost() + URL_USER_BASE + "/update"
+    }
+
+
+    fun getUserInfoUrl():String {
+        return getServerHost() + URL_USER_BASE + "/info"
+    }
+
+    fun getImageUploadUrl():String {
+        return getServerHost() + URL_IMAGE_BASE + "/upload"
+    }
+
     fun getImageUrl(context: Context, url:String):String {
-        val token = getUserToken(context);
+        val token = getUserToken(context)
         val hostUrl = getServerHost() + URL_IMAGE_BASE + "/get"
         val map = HashMap<String, String>()
         map["token"] = token
         map["image"] = url
         return addParamToUrl(hostUrl, map)
+    }
+
+    fun encodeString(content:String):String {
+        var encodeStr:String? = null
+        try{
+            val md = MessageDigest.getInstance("md5")
+            val md5 = md.digest(content.toByteArray())
+            encodeStr = Base64.encodeToString(md5, 0)
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+        }
+        return encodeStr?:""
     }
 
     private fun generateUserToken():String{
@@ -129,7 +159,7 @@ object Constants{
         return md5Token?:""
     }
 
-    private fun saveUserToken(context:Context, token:String) {
+    fun saveUserToken(context:Context, token:String) {
         context.getSharedPreferences(SHARES_FILE, Context.MODE_PRIVATE).edit()
                 .putString(WS_MSG_TOKEN_SELF, token)
                 .apply()
@@ -161,5 +191,23 @@ object Constants{
             }
         }
         return true
+    }
+
+    const val QRCODE_IMG_SIZE = 560
+    const val USER_IMG_SIZE = 520
+    const val PWD_MIN_LENGTH = 8
+    const val PWD_MAX_LENGTH = 15
+    const val USER_LOGIN_STATUS = "login_state"
+    const val USER_LOGIN_STATUS_OFF = 0
+    const val USER_LOGIN_STATUS_ON = 1
+
+    fun setLoginStatus(context:Context, status:Int) {
+        context.getSharedPreferences(SHARES_FILE, Context.MODE_PRIVATE).edit()
+                .putInt(USER_LOGIN_STATUS, status)
+                .apply()
+    }
+
+    fun getLoginStatus(context:Context):Int {
+        return context.getSharedPreferences(SHARES_FILE, Context.MODE_PRIVATE).getInt(USER_LOGIN_STATUS, USER_LOGIN_STATUS_OFF)
     }
 }

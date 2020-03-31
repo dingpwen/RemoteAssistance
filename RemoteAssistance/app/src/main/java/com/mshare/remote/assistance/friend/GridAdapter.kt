@@ -47,7 +47,7 @@ class GridAdapter(context: Context): RecyclerView.Adapter<GridAdapter.GridViewHo
             Glide.with(mContext).load(imgUrl).placeholder(R.drawable.default_img).into(holder.image)
         }
         holder.itemView.setOnClickListener {
-            val intent = Intent(mContext,MainActivity::class.java);
+            val intent = Intent(mContext,MainActivity::class.java)
             intent.putExtra("token", friend.user_token)
             mContext.startActivity(intent)
         }

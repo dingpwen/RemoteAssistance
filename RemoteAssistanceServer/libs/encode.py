@@ -12,7 +12,7 @@ class Encode:
         md5 = hashlib.md5(str(ct).encode(encoding='UTF-8')).digest()
         fix = hashlib.md5(user_token_fix.encode(encoding='UTF-8')).digest()
         data = md5[:user_token_fix_pos] + fix[:] + md5[user_token_fix_pos:]
-        return base64.b64encode(data)
+        return base64.b64encode(data).decode('ascii')
 
     @staticmethod
     def decode(encode_str):

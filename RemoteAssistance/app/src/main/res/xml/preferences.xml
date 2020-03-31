@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference
+        app:key="login"
+        app:icon="@drawable/default_img"
+        app:title="@string/setting_login"
+        app:summary="@string/setting_login_dsc">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="com.mshare.remote.assistance"
+            android:targetClass="com.mshare.remote.assistance.ui.login.LoginActivity"/>
+    </Preference>
+
+    <Preference
+        app:key="logout"
+        app:icon="@drawable/default_img"
+        app:title="@string/setting_logout"
+        app:summary="@string/setting_logout_dsc"/>
+
+    <Preference
+        app:key="detail"
+        app:title="@string/setting_my_detail">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="com.mshare.remote.assistance"
+            android:targetClass="com.mshare.remote.assistance.ui.user.DetailActivity"/>
+    </Preference>
+
+</androidx.preference.PreferenceScreen>

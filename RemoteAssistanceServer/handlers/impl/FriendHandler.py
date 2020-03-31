@@ -22,8 +22,6 @@ class FriendHandler(BaseHandler, ABC):
     async def get(self, *args, **kwargs):
         token = self.get_query_argument("token")
         url = self.request.uri
-        print("token:", token)
-        print("url:", url)
         if url.startswith("/friend/list"):
             await self.get_friend_list(token)
             return

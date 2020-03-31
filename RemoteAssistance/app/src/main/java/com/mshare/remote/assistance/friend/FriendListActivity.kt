@@ -4,14 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.zxing.activity.CaptureActivity
 import com.mshare.remote.assistance.Constants
+import com.mshare.remote.assistance.QrcodeActivity
 import kotlinx.android.synthetic.main.activity_friend_list.*
 import com.mshare.remote.assistance.R
+import com.mshare.remote.assistance.SettingsActivity
 import java.lang.ref.WeakReference
 
 class FriendListActivity : AppCompatActivity(), Contact.IView {
@@ -117,5 +121,27 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
                 }
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.friend_list_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.action_qrcode -> showMyQrcode()
+            R.id.action_settings -> gotoSettings()
+            else -> {}
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showMyQrcode() {
+        startActivity( Intent(this, QrcodeActivity::class.java))
+    }
+
+    private fun gotoSettings() {
+        startActivity( Intent(this, SettingsActivity::class.java))
     }
 }

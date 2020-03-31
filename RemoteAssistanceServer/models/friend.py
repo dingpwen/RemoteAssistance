@@ -62,3 +62,5 @@ class FriendModel:
     @staticmethod
     async def update_token(old_token, new_token):
         session.query(Friend).filter(Friend.ftk == old_token).update({Friend.ftk: new_token})
+        session.query(Friend).filter(Friend.token == old_token).update({Friend.token: new_token})
+        session.commit()

@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">远程协助</string>
+    <string name="title_activity_friend_list">好友列表</string>
+    <string name="friend_img_dsc">我的头像</string>
+    <string name="error_msg_net">网络无法连接</string>
+    <string name="error_msg_json">返回非JSON字串</string>
+    <string name="error_msg_add">添加好友失败</string>
+    <string name="error_msg_del">删除好友失败</string>
+    <string name="error_invalid_code">无效二维码</string>
+    <string name="menu_qrcode">我的二维码</string>
+    <string name="menu_settings">设置</string>
+    <string name="my_qrcode_dsc">我的二维码</string>
+    <string name="setting_login">登录或注册</string>
+    <string name="setting_login_dsc">登录账号或注册一个新账号</string>
+    <string name="setting_logout">退出登录</string>
+    <string name="setting_logout_dsc">退出您登录的账号</string>
+    <string name="setting_my_detail">个人资料</string>
+    <string name="login_title">从这开始输入您的号码和密码…</string>
+    <string name="title_phone">您的号码:</string>
+    <string name="prompt_phone">请输入您的手机号码</string>
+    <string name="title_password">您的密码:</string>
+    <string name="prompt_password">请输入账户密码</string>
+    <string name="title_code">验证码:</string>
+    <string name="prompt_code">请输入收到的验证码</string>
+    <string name="send_code">发送验证码</string>
+    <string name="login_button_login">登录</string>
+    <string name="login_button_logon">注册</string>
+    <string name="to_logon">没有账号？注册一个新账号</string>
+    <string name="to_login">登录已注册的账号</string>
+    <string name="fail_to_logon">注册失败</string>
+    <string name="fail_to_login">登录失败</string>
+
+    <string name="number_is_empty">手机号码不能为空</string>
+    <string name="number_is_invalid">无效手机号码</string>
+    <string name="pwd_is_empty">密码不能为空</string>
+    <string name="pwd_is_invalid">密码长度为8到15位 </string>
+    <string name="code_is_empty">请输入验证码</string>
+    <string name="detail_name_title">"您的名称: "</string>
+    <string name="detail_name_hint">请输入您的名称</string>
+    <string name="detail_name_content">您没有设置您的名称</string>
+    <string name="detail_image_title">"您的头像: "</string>
+    <string name="detail_menu_edit">编辑</string>
+    <string name="detail_menu_done">完成</string>
+
+    <string name="detail_app_title">个人信息</string>
+    <string name="login_app_title">登录/注册</string>
+    <string name="setting_app_title">设置</string>
+    <string name="qrcode_app_title">我的二维码</string>
+</resources>
