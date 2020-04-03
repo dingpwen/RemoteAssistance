@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Remote Assistance Application</string>
-    <string name="title_activity_friend_list">FriendListActivity</string>
+    <string name="title_activity_friend_list">Friend list</string>
     <string name="friend_img_dsc">My Picture</string>
+    <string name="friend_list_empty">No friends exist</string>
+    <string name="friend_list_loading">Loading…</string>
     <string name="error_msg_net">NetWork cannot be connected</string>
     <string name="error_msg_json">A json string is need </string>
     <string name="error_msg_add">Fail to add a friend</string>
@@ -10,12 +12,13 @@
     <string name="menu_qrcode">My qrcode</string>
     <string name="menu_settings">Settings</string>my_qrcode_dsc
     <string name="my_qrcode_dsc">My Qrcode</string>
+    <string name="qrcode_disc">Scan the qrcode to add friend</string>
     <string name="setting_login">Login in/up</string>
     <string name="setting_login_dsc">To log in your account if have, or register a new</string>
     <string name="setting_logout">Login out</string>
     <string name="setting_logout_dsc">To log out your account</string>
     <string name="setting_my_detail">My Details</string>
-    <string name="login_title">From here, please input your number and password¡­</string>
+    <string name="login_title">From here, please input your number and password…</string>
     <string name="title_phone">Phone number:</string>
     <string name="prompt_phone">Please input your phone number</string>
     <string name="title_password">Your password:</string>

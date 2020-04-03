@@ -2,6 +2,7 @@ package com.mshare.remote.assistance.ui.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -50,6 +51,9 @@ class LoginActivity : AppCompatActivity() {
                 loginFail(it.failType)
             }
         })
+
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun initView() {
@@ -159,5 +163,13 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.fail_to_logon, Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == android.R.id.home) {
+            finish()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

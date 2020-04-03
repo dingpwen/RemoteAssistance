@@ -2,6 +2,8 @@
     <string name="app_name">远程协助</string>
     <string name="title_activity_friend_list">好友列表</string>
     <string name="friend_img_dsc">我的头像</string>
+    <string name="friend_list_empty">您没有添加好友</string>
+    <string name="friend_list_loading">正在加载数据…</string>
     <string name="error_msg_net">网络无法连接</string>
     <string name="error_msg_json">返回非JSON字串</string>
     <string name="error_msg_add">添加好友失败</string>
@@ -10,6 +12,7 @@
     <string name="menu_qrcode">我的二维码</string>
     <string name="menu_settings">设置</string>
     <string name="my_qrcode_dsc">我的二维码</string>
+    <string name="qrcode_disc">扫描下面的二维码添加好友</string>
     <string name="setting_login">登录或注册</string>
     <string name="setting_login_dsc">登录账号或注册一个新账号</string>
     <string name="setting_logout">退出登录</string>

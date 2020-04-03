@@ -56,6 +56,8 @@ class DetailActivity : AppCompatActivity() {
         } else {
             loadInfo()
         }
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun setView() {
@@ -161,6 +163,7 @@ class DetailActivity : AppCompatActivity() {
         when(item.itemId) {
             R.id.action_edit -> gotoEditMode()
             R.id.action_done -> doSave()
+            android.R.id.home -> finish()
             else -> {}
         }
         return super.onOptionsItemSelected(item)

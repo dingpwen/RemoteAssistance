@@ -6,6 +6,8 @@ import android.os.Handler
 import android.os.Message
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,6 +23,7 @@ import java.lang.ref.WeakReference
 class FriendListActivity : AppCompatActivity(), Contact.IView {
     private lateinit var mPresenter:Contact.IPresenter
     private lateinit var mAdaper:GridAdapter
+    private lateinit var mEmptyView: TextView
     private val mHandler = MainHadler(this@FriendListActivity)
 
     companion object{
@@ -72,6 +75,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
             it.setHasFixedSize(false)
             it.adapter = mAdaper
         }
+        mEmptyView = findViewById(R.id.empty_view)
     }
 
     override fun onDestroy() {
@@ -81,6 +85,12 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
 
     override fun setData(friendList: MutableList<FriendInfo>) = runOnUiThread{
         mAdaper.setData(friendList)
+        if(friendList.size == 0) {
+            mEmptyView.setText(R.string.friend_list_empty)
+            mEmptyView.visibility = View.VISIBLE
+        } else {
+            mEmptyView.visibility = View.GONE
+        }
     }
 
     override fun onError(type: Int) {

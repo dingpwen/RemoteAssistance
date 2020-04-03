@@ -20,6 +20,7 @@
 
     <Preference
         app:key="detail"
+        app:icon="@android:drawable/ic_dialog_info"
         app:title="@string/setting_my_detail">
         <intent
             android:action="android.intent.action.MAIN"
