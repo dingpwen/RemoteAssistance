@@ -49,4 +49,7 @@
     <string name="login_app_title">登录/注册</string>
     <string name="setting_app_title">设置</string>
     <string name="qrcode_app_title">我的二维码</string>
+
+    <string name="start_record">长按发送语音</string>
+    <string name="in_record">正在录音…</string>
 </resources>

@@ -12,6 +12,7 @@ def use_to_json(users):
         user_json = dict()
         user_json["name"] = user.name
         user_json["user_token"] = user.token
+        user_json["number"] = user.number
         user_json["imageUrl"] = user.image
         user_array.append(user_json)
     return user_array
@@ -24,6 +25,9 @@ class FriendHandler(BaseHandler, ABC):
         url = self.request.uri
         if url.startswith("/friend/list"):
             await self.get_friend_list(token)
+            return
+        elif url.startswith("/friend/helpers"):
+            await self.get_helpers(token)
             return
         else:
             await self.send_invalid_path()
@@ -67,4 +71,16 @@ class FriendHandler(BaseHandler, ABC):
         else:
             result["status"] = res
             result["msg"] = "add failed"
+        self.write(json.dumps(result))
+
+    async def get_helpers(self, token):
+        result = dict()
+        friends = FriendModel.get_helpers(token)
+        if friends is None:
+            result["status"] = 201
+            result["msg"] = "no friend"
+        else:
+            result["status"] = 200
+            result["friends"] = use_to_json(friends)
+        print("result:", json.dumps(result))
         self.write(json.dumps(result))

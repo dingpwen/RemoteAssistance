@@ -49,4 +49,7 @@
     <string name="login_app_title">Login</string>
     <string name="setting_app_title">Settings</string>
     <string name="qrcode_app_title">My qrcode</string>
+
+    <string name="start_record">Press to speak</string>
+    <string name="in_record">Recording…</string>
 </resources>

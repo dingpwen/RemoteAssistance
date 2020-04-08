@@ -1,4 +1,5 @@
 package com.mshare.remote.assistance.friend
+import android.content.Context
 import okhttp3.Callback
 
 interface Contact {
@@ -18,6 +19,6 @@ interface Contact {
         fun detachView()
         fun loadData(token:String)
         fun addOrRemoveFriend(token:String, friendToken:String, type:Int)
-        fun addUser(token:String)
+        fun addUser(context: Context, token:String)
     }
 }

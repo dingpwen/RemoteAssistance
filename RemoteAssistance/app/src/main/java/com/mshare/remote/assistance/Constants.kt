@@ -170,7 +170,6 @@ object Constants{
         var token = sp.getString(WS_MSG_TOKEN_SELF, "")
         if(generate && token == "") {
             token = generateUserToken()
-            saveUserToken(context, token)
         }
         return token?:return ""
     }

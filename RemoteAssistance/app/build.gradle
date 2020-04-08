@@ -12,11 +12,11 @@ android {
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0.0.200312_alpha"
+        versionName "1.0.0.200403_alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     sourceSets {
-        main{
+        main {
             res.srcDirs += "src/main/res-zxing"
         }
     }

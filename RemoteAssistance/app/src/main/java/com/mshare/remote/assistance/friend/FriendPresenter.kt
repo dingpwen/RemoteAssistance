@@ -1,5 +1,6 @@
 package com.mshare.remote.assistance.friend
 
+import android.content.Context
 import android.util.Log
 import com.mshare.remote.assistance.Constants
 import okhttp3.Call
@@ -91,7 +92,7 @@ class FriendPresenter:Contact.IPresenter {
         }, type)
     }
 
-    override fun addUser(token: String) {
+    override fun addUser(context: Context, token: String) {
         val map = HashMap<String, String>()
         map[Constants.WS_MSG_TOKEN_SELF] = token
         map[Constants.USER_TOKEN_CATEGORY] = "2"
@@ -101,7 +102,17 @@ class FriendPresenter:Contact.IPresenter {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                Log.e("wenpd", "onResponse:${response.message}")
+                val result = response.body!!.string()
+                try {
+                    val obj = JSONObject(result)
+                    val status = obj.getInt("status")
+                    if(status == 200) {
+                        Constants.saveUserToken(context, token);
+                    }
+                }catch (e:JSONException) {
+                    e.printStackTrace()
+                }
+                Constants.saveUserToken(context, token);
             }
 
         }, 2)

@@ -58,7 +58,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         var token = Constants.getUserToken(this, false)
         if(token == "") {
             token = Constants.getUserToken(this, true)
-            mPresenter.addUser(token)
+            mPresenter.addUser(this, token)
         } else {
             mPresenter.loadData(token)
         }

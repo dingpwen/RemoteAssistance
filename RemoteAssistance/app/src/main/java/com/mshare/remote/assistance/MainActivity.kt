@@ -1,27 +1,36 @@
 package com.mshare.remote.assistance
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioRecord
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.util.Log
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import com.mshare.remote.assistance.util.AudioUtils
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.ref.WeakReference
-import kotlin.collections.HashMap
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mRemoteImg:ImageView
+    private lateinit var recordBtn:Button
     private var mGoalToken:String? = null
     private var retry = 0
     private var needRetry = true
@@ -50,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -61,18 +70,48 @@ class MainActivity : AppCompatActivity() {
             return
         }
         mHandler.sendEmptyMessageDelayed(MSG_RETRY, RETRY_DURING)
-        findViewById<Button>(R.id.start).setOnClickListener {
+        /*findViewById<Button>(R.id.start).setOnClickListener {
             startWebSocket()
+        }*/
+        recordBtn = findViewById(R.id.start)
+        recordBtn.setOnTouchListener{_, event ->
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> startRecord()
+                MotionEvent.ACTION_UP -> stopRecord()
+                else -> {}
+            }
+            false
         }
+        recordBtn.isEnabled = false
 
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    override fun onResume() {
+        super.onResume()
+        ActivityCompat.requestPermissions(this, arrayOf(
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE), 1
+        )
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == 1) {
+            //do something
+            Log.d("wenpd", "check permission")
+        }
+    }
+
+    /************************** WebSocket ***************************/
+    private lateinit var webSocketListener: MainWebSocketListener
     private fun startWebSocket() {
         val map = HashMap<String, String>()
         map[Constants.WS_MSG_TOKEN_SELF] = Constants.getUserToken(this)
-        Constants.createWebSocket(Constants.getWSServerHost(), MainWebSocketListener(), map)
+        webSocketListener = MainWebSocketListener()
+        Constants.createWebSocket(Constants.getWSServerHost(), webSocketListener, map)
     }
 
     private fun setRemoteImage(jpgBytes:ByteArray) {
@@ -91,6 +130,7 @@ class MainActivity : AppCompatActivity() {
             mWebSocket = webSocket
             mOpened = true
             needRetry = false
+            recordBtn.isEnabled = true
             mHandler.removeMessages(MSG_RETRY)
             sendHelpMsg()
         }
@@ -166,6 +206,15 @@ class MainActivity : AppCompatActivity() {
             obj.put(Constants.WS_MSG_TOKEN_GOAL, mGoalToken)
             mWebSocket?.send(obj.toString())
         }
+
+        fun sendByteMsg(byteString:ByteString, type:Byte) {
+            if(mOpened) {
+                val bytes = ByteArray(1 + byteString.size)
+                bytes[0] = type
+                System.arraycopy(byteString.toByteArray(), 0, bytes, 1, byteString.size)
+                mWebSocket?.send(bytes.toByteString())
+            }
+        }
     }
 
     private fun showInvalidToast() {
@@ -186,5 +235,64 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopRecord()
+    }
+
+    /***************** Audio Record *****************************/
+    private var bufferSizeInBytes = 0
+    private var audioRecord: AudioRecord? = null
+    @Volatile private var isRecording = false
+    private var curRecordThread:AudioRecordThread? = null
+
+    private fun createAudioRecord() {
+        bufferSizeInBytes = AudioRecord.getMinBufferSize(AudioUtils.AUDIO_SAMPLE_RATE, AudioUtils.CHANNEL_CONFIG, AudioUtils.AUDIO_FORMAT)
+        audioRecord = AudioRecord(AudioUtils.AUDIO_SOURCE, AudioUtils.AUDIO_SAMPLE_RATE, AudioUtils.CHANNEL_CONFIG, AudioUtils.AUDIO_FORMAT, bufferSizeInBytes)
+    }
+
+    private fun startRecord():Int {
+        if(isRecording) {
+            return AudioUtils.E_STATE_RECODING
+        }
+        if(audioRecord == null) {
+            createAudioRecord()
+        }
+        audioRecord?.startRecording()
+        isRecording = true
+        recordBtn.setText(R.string.in_record)
+        curRecordThread = AudioRecordThread()
+        curRecordThread?.start()
+        return AudioUtils.SUCCESS
+    }
+
+    private fun stopRecord() {
+        if(audioRecord != null) {
+            isRecording = false
+            curRecordThread?.interrupt()
+            curRecordThread = null
+            audioRecord?.stop()
+            audioRecord?.release()
+            audioRecord = null
+            recordBtn.setText(R.string.start_record)
+        }
+    }
+
+    private inner class AudioRecordThread:Thread(){
+        override fun run() {
+            val audioBuffer:ByteBuffer = ByteBuffer.allocateDirect(bufferSizeInBytes * 100).order(ByteOrder.LITTLE_ENDIAN)
+            var readSize:Int
+            try {
+                while (isRecording) {
+                    readSize = audioRecord!!.read(audioBuffer, audioBuffer.capacity())
+                    if (readSize == AudioRecord.ERROR_INVALID_OPERATION || readSize == AudioRecord.ERROR_BAD_VALUE) {
+                        Log.d("wenpd", "Could not read audio data")
+                        break
+                    }
+                    webSocketListener.sendByteMsg(audioBuffer.toByteString(), Constants.DATA_TYPE_AUDIO)
+                    audioBuffer.clear()
+                }
+            } catch (e:InterruptedException) {
+                e.printStackTrace()
+            }
+        }
     }
 }
