@@ -1,6 +1,7 @@
 from libs.db import Base, session
 from sqlalchemy import Sequence
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.exc import InvalidRequestError
 from libs.encode import Encode
 import time
 
@@ -77,6 +78,13 @@ class UserModel:
 
     @staticmethod
     def update_user(token, name, image):
-        session.query(User).filter(User.token == token).update({User.name: name, User.image: image})
-        session.commit()
-        return session.query(User).filter(User.token == token).first()
+        user = None
+        try:
+            session.query(User).filter(User.token == token).update({User.name: name, User.image: image})
+            session.commit()
+            user = session.query(User).filter(User.token == token).first()
+        except InvalidRequestError:
+            session.rollback()
+        except Exception as e:
+            print(e)
+        return user

@@ -3,23 +3,21 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.text.TextUtils
 import android.util.Base64
-import android.util.Log
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocketListener
-import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.concurrent.TimeUnit
 
 object Constants{
-    const val DEBUG_MODE = true
+    const val DEBUG_MODE = false
     const val SHARES_FILE = "assistance"
     //private const val SERVER_LOCAL_BASE = "://192.168.0.109:5000/"
     private const val SERVER_LOCAL_BASE = "://172.16.200.206:5000/"
-    private const val SERVER_REMOTE_BASE = "://mshare.frp1.chuantou.org:58000/"
+    private const val SERVER_REMOTE_BASE = "://121.36.10.45:5000/"
     private const val WS_SERVER_LOCAL:String = "ws"+ SERVER_LOCAL_BASE + "socket"
     private const val WS_SERVER_REMOTE:String = "ws"+ SERVER_REMOTE_BASE + "socket"
     const val WS_MSG_COMMAND_SELF:String = "command"

@@ -54,6 +54,7 @@ class DetailActivity : AppCompatActivity() {
             mImgUrl =intent.getStringExtra("image")!!
             setView()
         } else {
+            mName = ""
             loadInfo()
         }
         supportActionBar?.setHomeButtonEnabled(true)

@@ -1,5 +1,6 @@
 from libs.db import Base, session
 from sqlalchemy import Column, Integer, String, func
+from sqlalchemy.exc import InvalidRequestError
 from models.user import User
 from settings.config import max_helpers
 import time
@@ -34,9 +35,13 @@ class FriendModel:
 
     @staticmethod
     def del_friend(token, ftk):
-        session.query(Friend).filter(Friend.ftk == ftk, Friend.token == token).delete()
-        session.query(Friend).filter(Friend.token == ftk, Friend.ftk == token).delete()
-        session.commit()
+        try:
+            session.query(Friend).filter(Friend.ftk == ftk, Friend.token == token).delete()
+            session.query(Friend).filter(Friend.token == ftk, Friend.ftk == token).delete()
+            session.commit()
+        except InvalidRequestError:
+            session.rollback()
+            pass
 
     @staticmethod
     def add_friend(token, ftk):
@@ -69,9 +74,12 @@ class FriendModel:
 
     @staticmethod
     async def update_token(old_token, new_token):
-        session.query(Friend).filter(Friend.ftk == old_token).update({Friend.ftk: new_token})
-        session.query(Friend).filter(Friend.token == old_token).update({Friend.token: new_token})
-        session.commit()
+        try:
+            session.query(Friend).filter(Friend.ftk == old_token).update({Friend.ftk: new_token})
+            session.query(Friend).filter(Friend.token == old_token).update({Friend.token: new_token})
+            session.commit()
+        except InvalidRequestError:
+            session.rollback()
 
     @staticmethod
     def get_helpers(token):

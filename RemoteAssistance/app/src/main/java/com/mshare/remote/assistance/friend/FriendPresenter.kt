@@ -107,14 +107,12 @@ class FriendPresenter:Contact.IPresenter {
                     val obj = JSONObject(result)
                     val status = obj.getInt("status")
                     if(status == 200) {
-                        Constants.saveUserToken(context, token);
+                        Constants.saveUserToken(context, token)
                     }
                 }catch (e:JSONException) {
                     e.printStackTrace()
                 }
-                Constants.saveUserToken(context, token);
             }
-
         }, 2)
     }
 }

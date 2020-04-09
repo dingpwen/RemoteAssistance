@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private var retry = 0
     private var needRetry = true
     private val mHandler = MainHadler(this@MainActivity)
+    private var needCheckPermission = true
 
     companion object{
         private const val MSG_RETRY = 0x121
@@ -90,18 +91,25 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        ActivityCompat.requestPermissions(this, arrayOf(
+        if(needCheckPermission) {
+            ActivityCompat.requestPermissions(this, arrayOf(
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE), 1
-        )
+                Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if(requestCode == 1) {
             //do something
-            Log.d("wenpd", "check permission")
+            needCheckPermission = false;
+        }
+    }
+
+    private fun setRecordEnable(enable:Boolean) {
+        runOnUiThread {
+            recordBtn.isEnabled = enable
         }
     }
 
@@ -130,7 +138,7 @@ class MainActivity : AppCompatActivity() {
             mWebSocket = webSocket
             mOpened = true
             needRetry = false
-            recordBtn.isEnabled = true
+            setRecordEnable(true)
             mHandler.removeMessages(MSG_RETRY)
             sendHelpMsg()
         }
@@ -171,6 +179,7 @@ class MainActivity : AppCompatActivity() {
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             super.onClosed(webSocket, code, reason)
             mOpened = false
+            setRecordEnable(false)
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {

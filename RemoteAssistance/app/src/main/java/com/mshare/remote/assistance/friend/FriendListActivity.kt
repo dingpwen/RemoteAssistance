@@ -59,6 +59,8 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         if(token == "") {
             token = Constants.getUserToken(this, true)
             mPresenter.addUser(this, token)
+            mEmptyView.setText(R.string.friend_list_empty)
+            mEmptyView.visibility = View.VISIBLE
         } else {
             mPresenter.loadData(token)
         }

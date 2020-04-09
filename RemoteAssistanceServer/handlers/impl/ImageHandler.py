@@ -5,8 +5,10 @@ from libs.encode import Encode
 import time
 import io
 import json
-from PIL import Image
+from PIL import Image, ImageFile
 from settings.config import max_img_size
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class ImageHandler(BaseHandler, ABC):
@@ -36,7 +38,7 @@ class ImageHandler(BaseHandler, ABC):
                 self.write(json.dumps(result))
                 return
             ut = int(time.time())
-            file_name = token + str(ut) + ".jpg"
+            file_name = token.replace("/", "_") + str(ut) + ".jpg"
             save_to = 'static/upload/{}'.format(file_name)
             await self.upload(image_data, save_to)
             result["status"] = 200
@@ -46,6 +48,16 @@ class ImageHandler(BaseHandler, ABC):
             await self.send_invalid_path()
 
     async def download(self, file_name):
+        try:
+            pic = open(file_name, "rb")
+        except FileNotFoundError:
+            self.write_error(404)
+            return
+        self.write(pic.read())
+        self.set_header('Content-Type', 'image/png')
+        pass
+
+    '''async def download(self, file_name):
         try:
             img = Image.open(file_name)
             height = img.size[1]
@@ -60,11 +72,20 @@ class ImageHandler(BaseHandler, ABC):
             return
         bio = io.BytesIO()
         img.save(bio, "PNG")
-        self.set_header('Content-Type', 'image/PNG')
+        self.set_header('Content-Type', 'image/png')
         self.write(bio.getvalue())
-        pass
+        pass'''
 
     @staticmethod
     async def upload(image_data, save_to):
         with open(save_to, 'wb') as f:
             f.write(image_data)
+        f.close()
+        img = Image.open(save_to)
+        height = img.size[1]
+        width = img.size[0]
+        while (height > max_img_size) or (width > max_img_size):
+            height = height // 2
+            width = width // 2
+        img = img.resize((width, height))
+        img.save(save_to)
