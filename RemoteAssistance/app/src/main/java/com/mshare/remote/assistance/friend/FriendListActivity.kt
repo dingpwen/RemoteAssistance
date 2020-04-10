@@ -25,6 +25,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
     private lateinit var mAdaper:GridAdapter
     private lateinit var mEmptyView: TextView
     private val mHandler = MainHadler(this@FriendListActivity)
+    private var deleteMode = false
 
     companion object{
         private const val REQUEST_CODE_SCAN = 0x123
@@ -58,7 +59,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         var token = Constants.getUserToken(this, false)
         if(token == "") {
             token = Constants.getUserToken(this, true)
-            mPresenter.addUser(this, token)
+            mPresenter.addUser(this, token, "2",true)
             mEmptyView.setText(R.string.friend_list_empty)
             mEmptyView.visibility = View.VISIBLE
         } else {
@@ -71,7 +72,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
     }
 
     private fun initListView() {
-        mAdaper = GridAdapter(this)
+        mAdaper = GridAdapter(this, mPresenter)
         findViewById<RecyclerView>(R.id.friend_list).let{
             it.layoutManager = GridLayoutManager(this, 2)
             it.setHasFixedSize(false)
@@ -144,6 +145,10 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         when(item.itemId) {
             R.id.action_qrcode -> showMyQrcode()
             R.id.action_settings -> gotoSettings()
+            R.id.action_delete -> {
+                gotoDeleteMode()
+                item.title = if(deleteMode) getString(R.string.menu_cancel_delete) else getString(R.string.menu_delete)
+            }
             else -> {}
         }
         return super.onOptionsItemSelected(item)
@@ -155,5 +160,10 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
 
     private fun gotoSettings() {
         startActivity( Intent(this, SettingsActivity::class.java))
+    }
+
+    private fun gotoDeleteMode() {
+        deleteMode = !deleteMode
+        mAdaper.setDeleteMode(deleteMode)
     }
 }

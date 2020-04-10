@@ -13,9 +13,11 @@ import com.bumptech.glide.Glide
 import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.MainActivity
 
-class GridAdapter(context: Context): RecyclerView.Adapter<GridAdapter.GridViewHolder>() {
+class GridAdapter(context: Context,  presenter: Contact.IPresenter): RecyclerView.Adapter<GridAdapter.GridViewHolder>() {
     private val mContext = context
     private var mFriendList:MutableList<FriendInfo> = ArrayList()
+    private var deleteMode = false
+    private val mPresenter = presenter
 
     fun setData(friendList:MutableList<FriendInfo>) {
         mFriendList = friendList
@@ -38,6 +40,7 @@ class GridAdapter(context: Context): RecyclerView.Adapter<GridAdapter.GridViewHo
         } else {
             holder.title.text = friend.name
         }
+
         if(friend.imageUrl.isEmpty() || friend.imageUrl == "none") {
             //holder.image.setImageResource(R.drawable.default_img)
             val imgUrl = Constants.getImageUrl(mContext, "default.jpg")
@@ -51,10 +54,25 @@ class GridAdapter(context: Context): RecyclerView.Adapter<GridAdapter.GridViewHo
             intent.putExtra("token", friend.user_token)
             mContext.startActivity(intent)
         }
+
+        if(deleteMode) {
+            holder.delete.visibility = View.VISIBLE
+            holder.delete.setOnClickListener {
+                mPresenter.addOrRemoveFriend(Constants.getUserToken(mContext), mFriendList.get(position).user_token, 2)
+            }
+        } else {
+            holder.delete.visibility = View.GONE
+        }
     }
 
     class GridViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val title:TextView = itemView.findViewById(R.id.title)
         val image:ImageView = itemView.findViewById(R.id.header_img)
+        val delete:TextView = itemView.findViewById(R.id.delete)
+    }
+
+    public fun setDeleteMode(deleteMode:Boolean) {
+        this.deleteMode = deleteMode
+        notifyDataSetChanged()
     }
 }

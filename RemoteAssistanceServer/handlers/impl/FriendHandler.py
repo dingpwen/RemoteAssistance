@@ -42,11 +42,7 @@ class FriendHandler(BaseHandler, ABC):
             await self.add_friend(token, ftk)
             return
         elif url.startswith("/friend/del"):
-            await FriendModel.del_friend(token, ftk)
-            result = dict()
-            result["status"] = 200
-            result["msg"] = "add success"
-            self.write(json.dumps(result))
+            await self.delete_friend(token, ftk)
         else:
             await self.send_invalid_path()
 
@@ -83,4 +79,11 @@ class FriendHandler(BaseHandler, ABC):
             result["status"] = 200
             result["friends"] = use_to_json(friends)
         print("result:", json.dumps(result))
+        self.write(json.dumps(result))
+
+    async def delete_friend(self, token, ftk):
+        FriendModel.del_friend(token, ftk)
+        result = dict()
+        result["status"] = 200
+        result["msg"] = "add success"
         self.write(json.dumps(result))

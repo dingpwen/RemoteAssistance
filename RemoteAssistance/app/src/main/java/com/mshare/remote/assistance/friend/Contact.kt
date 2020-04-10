@@ -19,6 +19,6 @@ interface Contact {
         fun detachView()
         fun loadData(token:String)
         fun addOrRemoveFriend(token:String, friendToken:String, type:Int)
-        fun addUser(context: Context, token:String)
+        fun addUser(context: Context, token:String, category:String, needSaved:Boolean)
     }
 }

@@ -156,6 +156,7 @@ class MainActivity : AppCompatActivity() {
                 Constants.WS_MSG_COMMAND_END -> {
                     mHandler.sendEmptyMessage(MSG_INVALD)
                     closeWebSocket()
+                    finish()
                 }
                 Constants.WS_MSG_COMMAND_HELP -> sendInvaldMsg()
                 Constants.WS_MSG_COMMAND_INVALID -> closeWebSocket()

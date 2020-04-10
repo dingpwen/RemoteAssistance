@@ -92,10 +92,10 @@ class FriendPresenter:Contact.IPresenter {
         }, type)
     }
 
-    override fun addUser(context: Context, token: String) {
+    override fun addUser(context: Context, token: String, category:String, needSaved:Boolean) {
         val map = HashMap<String, String>()
         map[Constants.WS_MSG_TOKEN_SELF] = token
-        map[Constants.USER_TOKEN_CATEGORY] = "2"
+        map[Constants.USER_TOKEN_CATEGORY] = category
         mModel.addUser(map,object:Callback{
             override fun onFailure(call: Call, e: IOException) {
                 Log.e("wenpd", "IOException", e)
@@ -106,7 +106,7 @@ class FriendPresenter:Contact.IPresenter {
                 try {
                     val obj = JSONObject(result)
                     val status = obj.getInt("status")
-                    if(status == 200) {
+                    if(status == 200 && needSaved) {
                         Constants.saveUserToken(context, token)
                     }
                 }catch (e:JSONException) {
