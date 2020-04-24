@@ -41,11 +41,15 @@ class UserHandler(BaseHandler, ABC):
             category = self.get_body_argument('category')
             number = self.get_body_argument('number')
             password = self.get_body_argument('password')
-            await self.register_user(token, number, password, category)
+            dev_sn = self.get_body_argument('sn')
+            await self.register_user(token, number, password, category, dev_sn)
         elif url.startswith("/user/update"):
             name = self.get_body_argument('name')
             image = self.get_body_argument('image')
             await self.update_user(token, name, image)
+        elif url.startswith("/user/sn_update"):
+            sn = self.get_body_argument('sn')
+            await self.update_sn(token, sn)
         else:
             await self.send_invalid_path()
 
@@ -83,8 +87,8 @@ class UserHandler(BaseHandler, ABC):
             result["msg"] = "add Fail"
         self.write(json.dumps(result))
 
-    async def register_user(self, token, number, password, category):
-        res, user = UserModel.reg_user(number, password, category)
+    async def register_user(self, token, number, password, category, dev_sn):
+        res, user = UserModel.reg_user(number, password, category, dev_sn)
         result = dict()
         if res == 0:
             await FriendModel.update_token(token, user.token)
@@ -101,4 +105,11 @@ class UserHandler(BaseHandler, ABC):
         result["status"] = 200
         if user is not None:
             result["user"] = user_to_json(user)
+        self.write(json.dumps(result))
+
+    async def update_sn(self, token, sn):
+        UserModel.update_sn(token, sn)
+        result = dict()
+        result["status"] = 200
+        result["msg"] = "update success"
         self.write(json.dumps(result))

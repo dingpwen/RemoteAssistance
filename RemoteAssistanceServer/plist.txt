@@ -3,3 +3,5 @@ sqlalchemy
 pymysql
 Pillow
 mysql
+qrcode
+Pillow

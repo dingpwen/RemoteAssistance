@@ -15,6 +15,18 @@ class Encode:
         return base64.b64encode(data).decode('ascii')
 
     @staticmethod
+    def encode_str(content):
+        ct = time.time()
+        if len(content) > 50:
+            content = content[:50] + str(ct)
+        else:
+            content = content + str(ct)
+        md5 = hashlib.md5(content.encode(encoding='UTF-8')).digest()
+        fix = hashlib.md5(user_token_fix.encode(encoding='UTF-8')).digest()
+        data = md5[:user_token_fix_pos] + fix[:] + md5[user_token_fix_pos:]
+        return base64.b64encode(data).decode('ascii')
+
+    @staticmethod
     def decode(encode_str):
         try:
             return base64.b64decode(encode_str)

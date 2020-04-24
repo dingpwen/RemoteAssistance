@@ -13,8 +13,8 @@ import java.security.NoSuchAlgorithmException
 import java.util.concurrent.TimeUnit
 
 object Constants{
-    const val DEBUG_MODE = false
-    const val SHARES_FILE = "assistance"
+    private var DEBUG_MODE = false
+    private const val SHARES_FILE = "assistance"
     //private const val SERVER_LOCAL_BASE = "://192.168.0.109:5000/"
     private const val SERVER_LOCAL_BASE = "://172.16.200.206:5000/"
     private const val SERVER_REMOTE_BASE = "://121.36.10.45:5000/"
@@ -62,12 +62,11 @@ object Constants{
     }
 
     val httpClient = OkHttpClient()
-    private const val HTTP_SERVER_LOCAL = "http"+ SERVER_LOCAL_BASE
-    private const val HTTP_SERVER_REMOTE = "http"+ SERVER_REMOTE_BASE
+    private const val HTTP_SERVER_LOCAL = "http$SERVER_LOCAL_BASE"
+    private const val HTTP_SERVER_REMOTE = "http$SERVER_REMOTE_BASE"
     private const val URL_FRIEND_BASE = "friend"
     private const val URL_USER_BASE = "user"
     private const val URL_IMAGE_BASE = "image"
-    const val MEDIA_TYPE_JSON = "application/json"
     private const val USER_TOKEN_FIX = "wveinwpadlakm@I"
     private const val USER_TOKEN_POS = 10
     const val ERROR_TYPE_NET = -1

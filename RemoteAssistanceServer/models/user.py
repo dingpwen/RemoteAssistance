@@ -16,16 +16,18 @@ class User(Base):
     image = Column(String(100))
     # 1:visual impaired 2: helper
     category = Column(Integer)
+    sn = Column(String(30))
     rt = Column(String(20))
     lt = Column(String(20))
 
-    def __init__(self, name, number, password, token, image, category, rt, lt):
+    def __init__(self, name, number, password, token, image, category, sn, rt, lt):
         self.name = name
         self.number = number
         self.password = password
         self.token = token
         self.image = image
         self.category = category
+        self.sn = sn
         self.rt = rt
         self.lt = lt
         pass
@@ -42,20 +44,20 @@ class UserModel:
         if user is not None:
             return -1, user
         rt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        user = User("", "", "", token, "", category, rt, rt)
+        user = User("", "", "", token, "", category, "", rt, rt)
         session.add(user)
         session.commit()
         user = session.query(User).filter(User.token == token).first()
         return 0, user
 
     @staticmethod
-    def reg_user(number, password, category):
+    def reg_user(number, password, category, dev_sn):
         user = session.query(User).filter(User.number == number).first()
         if user is not None:
             return -1, user
         rt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         token = Encode.generate_token()
-        user = User("", number, password, token, "", category, rt, rt)
+        user = User("", number, password, token, "", category, dev_sn, rt, rt)
         session.add(user)
         session.commit()
         user = session.query(User).filter(User.token == token).first()
@@ -88,3 +90,13 @@ class UserModel:
         except Exception as e:
             print(e)
         return user
+
+    @staticmethod
+    def update_sn(token, sn):
+        try:
+            session.query(User).filter(User.token == token).update({User.sn: sn})
+            session.commit()
+        except InvalidRequestError:
+            session.rollback()
+        except Exception as e:
+            print(e)

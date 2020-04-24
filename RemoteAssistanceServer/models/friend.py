@@ -12,6 +12,7 @@ class Friend(Base):
     token = Column(String(100))
     ftk = Column(String(100))
     category = Column(Integer)
+    intimacy = Column(Integer(8), defautl=0)
     adt = Column(String(20))
 
     def __init__(self, token, ftk, category, adt):
@@ -32,6 +33,11 @@ class FriendModel:
         user_set2 = session.query(User).join(Friend, Friend.token == User.token).filter(Friend.ftk == token).all()
         return user_set1 + user_set2'''
         return session.query(User).join(Friend, Friend.ftk == User.token).filter(Friend.token == token).all()
+
+    @staticmethod
+    def get_friend_by_sn(token, sn_list):
+        return session.query(User).join(Friend, Friend.ftk == User.token)\
+            .filter(Friend.token == token, User.sn.in_(sn_list)).all()
 
     @staticmethod
     def del_friend(token, ftk):
@@ -83,7 +89,5 @@ class FriendModel:
 
     @staticmethod
     def get_helpers(token):
-        session.query(User).join(Friend, Friend.ftk == User.token)\
-            .filter(Friend.token == token,
-                    User.category == 2,
-                    User.number.isnot(None)).all()
+        return session.query(User).join(Friend, Friend.ftk == User.token)\
+            .filter(Friend.token == token, User.category == 2, User.number != "").all()

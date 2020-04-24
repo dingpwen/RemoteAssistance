@@ -26,6 +26,10 @@ class FriendHandler(BaseHandler, ABC):
         if url.startswith("/friend/list"):
             await self.get_friend_list(token)
             return
+        elif url.startswith("/friend/sn_list"):
+            sn_list = self.get_query_argument("sn_list")
+            await self.get_friend_list_by_sn(token, sn_list)
+            return
         elif url.startswith("/friend/helpers"):
             await self.get_helpers(token)
             return
@@ -49,6 +53,18 @@ class FriendHandler(BaseHandler, ABC):
     async def get_friend_list(self, token):
         result = dict()
         friends = FriendModel.get_friends(token)
+        if friends is None:
+            result["status"] = 201
+            result["msg"] = "no friend"
+        else:
+            result["status"] = 200
+            result["friends"] = use_to_json(friends)
+        print("result:", json.dumps(result))
+        self.write(json.dumps(result))
+
+    async def get_friend_list_by_sn(self, token, sn_list):
+        result = dict()
+        friends = FriendModel.get_friend_by_sn(token, sn_list)
         if friends is None:
             result["status"] = 201
             result["msg"] = "no friend"

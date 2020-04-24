@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>生成二维码</title>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+    </script>
+    <script type="text/javascript">
+
+        function doGenerate() {
+            var input_content = $('#my_content').val();
+            var input_url = $('#my_url').val();
+            if(!input_content.replace(/ +/g,"").replace(/[\r\n]/g,"")){
+                alert("固定内容不能为空");
+                return;
+            }
+             $.ajax({
+             url:"/qrcode/",
+             type:"POST",
+             data:{content:input_content, url:input_url},
+              success:function(arg){
+                  var obj = jQuery.parseJSON(arg);
+                  console.log(obj.image);
+                   $('#result_image').attr("src", obj.image);
+                   $('#result_image').show()
+              },
+              error:function(){
+                  console.log("failed");
+               }
+             });
+        }
+    </script>
+</head>
+<body>
+
+<table border="0" align="center" cellpadding="20">
+    <tr>
+        <td width="126" align="center">固定内容：</td>
+        <td  align="center"><textarea rows="10" cols="60" placeholder="输入要固定提示的部分内容" id="my_content">
+</textarea></td>
+    </tr>
+
+    <tr>
+        <td width="126" align="center">动态链接：</td>
+        <td  align="center"><textarea rows="1" cols="60" placeholder="输入动态查询部分的外部链接地址" id="my_url">
+</textarea></td>
+    </tr>
+
+    <tr>
+        <td width="126" align="center"><button type="button" onclick="doGenerate()">生成二维码</button></td>
+        <td  align="center"><img src="../qr_image/default.jpg"  alt="生产的二维码" id="result_image" hidden="hidden"/>
+</textarea></td>
+    </tr>
+
+</table>
+
+</body>
+</html>

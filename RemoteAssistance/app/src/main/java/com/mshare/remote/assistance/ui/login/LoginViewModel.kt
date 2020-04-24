@@ -62,6 +62,7 @@ class LoginViewModel: ViewModel() {
         map[Constants.WS_MSG_TOKEN_SELF] = token
         map["number"] = number
         map["password"] = Constants.encodeString(password)
+        map["sn"] = ""
         map["category"] = "2"
         loginModel.logon(map, object: Callback{
             override fun onFailure(call: Call, e: IOException) {
