@@ -27,6 +27,13 @@ class Encode:
         return base64.b64encode(data).decode('ascii')
 
     @staticmethod
+    def b64encode(data):
+        try:
+            return base64.b64encode(data).decode('ascii')
+        except binascii.Error:
+            return None
+
+    @staticmethod
     def decode(encode_str):
         try:
             return base64.b64decode(encode_str)

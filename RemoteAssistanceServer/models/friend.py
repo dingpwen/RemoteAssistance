@@ -12,18 +12,19 @@ class Friend(Base):
     token = Column(String(100))
     ftk = Column(String(100))
     category = Column(Integer)
-    intimacy = Column(Integer(8), defautl=0)
+    intimacy = Column(Integer, default=0)
     adt = Column(String(20))
 
-    def __init__(self, token, ftk, category, adt):
+    def __init__(self, token, ftk, category, intimacy, adt):
         self.category = category
         self.token = token
         self.ftk = ftk
+        self.intimacy = intimacy
         self.adt = adt
 
     def __repr__(self):
         return "{'token':'%s', 'ftk':'%s', 'category':'%d', 'time':'%s'}" % (
-            self.token, self.ftk, self.category, self.time)
+            self.token, self.ftk, self.category, self.adt)
 
 
 class FriendModel:
@@ -32,7 +33,9 @@ class FriendModel:
         '''user_set1 = session.query(User).join(Friend, Friend.ftk == User.token).filter(Friend.token == token).all()
         user_set2 = session.query(User).join(Friend, Friend.token == User.token).filter(Friend.ftk == token).all()
         return user_set1 + user_set2'''
-        return session.query(User).join(Friend, Friend.ftk == User.token).filter(Friend.token == token).all()
+        return session.query(User.name, User.token, User.number, User.image, Friend.intimacy)\
+            .join(Friend, Friend.ftk == User.token)\
+            .filter(Friend.token == token).order_by(Friend.intimacy.desc()).all()
 
     @staticmethod
     def get_friend_by_sn(token, sn_list):
@@ -69,10 +72,12 @@ class FriendModel:
                 return -2, None
         if my_category == 2 and friend_category == 2:
             return -4, None
+        if my_category == 1 and friend_category == 2:
+            intimacy = 1
         adt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        friend = Friend(token, ftk, friend_category, adt)
+        friend = Friend(token, ftk, friend_category, intimacy, adt)
         session.add(friend)
-        friend = Friend(ftk, token, my_category, adt)
+        friend = Friend(ftk, token, my_category, 0, adt)
         session.add(friend)
         session.commit()
         friend = session.query(Friend).filter(Friend.ftk == ftk, Friend.token == token).first()
@@ -91,3 +96,11 @@ class FriendModel:
     def get_helpers(token):
         return session.query(User).join(Friend, Friend.ftk == User.token)\
             .filter(Friend.token == token, User.category == 2, User.number != "").all()
+
+    @staticmethod
+    def update_intimacy(token, ftk, intimacy):
+        try:
+            session.query(Friend).filter(Friend.ftk == ftk, Friend.token == token).update({Friend.intimacy: intimacy})
+            session.commit()
+        except InvalidRequestError:
+            session.rollback()

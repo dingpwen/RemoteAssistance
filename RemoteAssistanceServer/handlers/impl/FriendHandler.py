@@ -18,6 +18,19 @@ def use_to_json(users):
     return user_array
 
 
+def friend_to_json(friends):
+    friend_array = []
+    for friend in friends:
+        friend_json = dict()
+        friend_json["name"] = friend.name
+        friend_json["user_token"] = friend.token
+        friend_json["number"] = friend.number
+        friend_json["imageUrl"] = friend.image
+        friend_json["intimacy"] = friend.intimacy
+        friend_array.append(friend_json)
+    return friend_array
+
+
 class FriendHandler(BaseHandler, ABC):
     @check_token
     async def get(self, *args, **kwargs):
@@ -47,6 +60,9 @@ class FriendHandler(BaseHandler, ABC):
             return
         elif url.startswith("/friend/del"):
             await self.delete_friend(token, ftk)
+        elif url.startswith("/friend/intimacy"):
+            intimacy = self.get_body_argument('intimacy')
+            await self.update_intimacy(token, ftk, intimacy)
         else:
             await self.send_invalid_path()
 
@@ -58,7 +74,7 @@ class FriendHandler(BaseHandler, ABC):
             result["msg"] = "no friend"
         else:
             result["status"] = 200
-            result["friends"] = use_to_json(friends)
+            result["friends"] = friend_to_json(friends)
         print("result:", json.dumps(result))
         self.write(json.dumps(result))
 
@@ -99,6 +115,13 @@ class FriendHandler(BaseHandler, ABC):
 
     async def delete_friend(self, token, ftk):
         FriendModel.del_friend(token, ftk)
+        result = dict()
+        result["status"] = 200
+        result["msg"] = "add success"
+        self.write(json.dumps(result))
+
+    async def update_intimacy(self, token, ftk, intimacy):
+        FriendModel.update_intimacy(token, ftk, intimacy)
         result = dict()
         result["status"] = 200
         result["msg"] = "add success"

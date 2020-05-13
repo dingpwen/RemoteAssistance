@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传新版本Patch</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+        function checkForm() {
+            var project = $('#project').val();
+            if(project == "Other") {
+                var project2 = $('#project2').val();
+                if(!project2.replace(/ +/g,"").replace(/[\r\n]/g,"")){
+                    alert("项目名称不能为空");
+                    return false;
+                }
+            }
+            var base = $('#base_version').val();
+            var version = $('#cur_version').val();
+            console.log("version:" + version + " base:" + base);
+            if(version <= base) {
+                alert("版本号设置不正确！");
+                return false;
+            }
+            var name = $('#version_name').val();
+            if(!name.replace(/ +/g,"").replace(/[\r\n]/g,"")){
+                alert("版本名称不能为空");
+                return false;
+            }
+            var type = $('#file_type').val();
+            var checksum = $('#checksum').val();
+            if(type == 0 && !checksum.replace(/ +/g,"").replace(/[\r\n]/g,"")) {
+                alert("请输入完整apk的checksum");
+                return false;
+            }
+            var file = $('#file').val();
+            if(file == "") {
+                alert("请选择要上传的patch/apk文件");
+                return false;
+            }
+            return true;
+        }
+        function onProject() {
+            var project = $("#project").val();
+            console.log(project);
+            if(project == "Other") {
+                $("#project2").show();
+                document.getElementById("project2").setAttribute("required", "required");
+                $('#base_version').attr("max", 19);
+                $('#cur_version').attr("min", 1);
+            } else {
+                $("#project2").hide();
+                document.getElementById("project2").removeAttribute("required");
+                $.ajax({
+                    url:"/version/load",
+                    type:"GET",
+                    data:{project:project},
+                    success:function(arg) {
+                        var obj = jQuery.parseJSON(arg);
+                        $('#base_version').attr("max", obj.version);
+                        $('#cur_version').attr("min", obj.version);
+                    },
+                    error:function() {
+                       console.log("load failed");
+                    }
+                });
+            }
+
+        }
+        function onType() {
+            var type = $("#file_type").val();
+            if(type == 1) {
+                document.getElementById("checksum").removeAttribute("required");
+            } else {
+                document.getElementById("checksum").setAttribute("required", "required");
+            }
+        }
+        window.onload = function() {
+            var select = document.getElementById("project");
+            $.ajax({
+                url:"/version/load",
+                type:"GET",
+                data:{project:"none"},
+                success:function(arg) {
+                    var obj = jQuery.parseJSON(arg);
+                    console.log(obj.version);
+                    console.log(obj.projects);
+                    if(obj.projects == "none") {
+                        console.log("no project");
+                        $("#project2").show();
+                        document.getElementById("project2").setAttribute("required", "required");
+                    } else {
+                        var projects = obj.projects.split(",");
+                        for(var project of projects) {
+                            var option = document.createElement("option");
+                            option.text = project;
+                            option.value = project;
+                            try{
+                                // 对于更早的版本IE8
+                                select.add(option,x.options[null]);
+                            }catch (e){
+                                select.add(option,null);
+                            }
+                        }
+                        $('#base_version').attr("max", obj.version);
+                        $('#cur_version').attr("min", obj.version);
+                    }
+                    var option = document.createElement("option");
+                    option.text = "其他项目";
+                    option.value = "Other";
+                    try{
+                        // 对于更早的版本IE8
+                        select.add(option,x.options[null]);
+                    }catch (e){
+                        select.add(option,null);
+                    }
+                },
+                error:function() {
+                    console.log("load failed");
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+
+<form method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
+<table border="0" align="center" cellpadding="20">
+    <tr>
+        <td width="126" align="center">项目：</td>
+        <td  align="left">
+            <select name="project" id="project" style="width:200px;" onchange="onProject()">
+                <!--option value="viwalk" selected="selected">viwalk</option>
+                <option value="Assistance">Assistance</option-->
+            </select>
+            <br><br><input type="text" style="width:200px;" hidden="hidden" name="project2" id="project2" placeholder="请输入项目名称">
+        </td>
+        <td width="126" align="center">升级方式：</td>
+        <td  align="left">
+            <select name="file_type" id="file_type" style="width:200px;" onchange="onType()">
+                <option value="0" selected="selected">差分升级</option>
+                <option value="1">整包升级</option>
+            </select>
+        </td>
+    </tr>
+
+    <tr>
+        <td width="126" align="center">基础版本：</td>
+        <td align="left" >
+            <input type="number" name="base_version" id="base_version" min="1" max="19" style="width:200px;" required="required"/>
+        </td>
+        <td width="126" align="center">当前版本：</td>
+        <td align="left"><input type="number" name="cur_version" id="cur_version" min="2" max="20" style="width:200px;" required="required"/></td>
+    </tr>
+
+    <tr>
+        <td width="126" align="center">版本名称：</td>
+        <td align="left">
+            <input type="text" name="version_name" id="version_name" style="width:200px;" placeholder="请输入更新的版本名称" required="required"/>
+        </td>
+        <td width="126" align="center">升级文件：</td>
+        <td  align="left"><input type="file" accept=".patch, .apk" id="file" name="file" required="required"/></td>
+    </tr>
+
+    <tr>
+        <td width="126" align="center">CheckSum：</td>
+        <td align="left">
+            <input type="text" name="checksum" id="checksum" style="width:200px;" placeholder="请输入完整APK的checksum" required="required"/>
+        </td>
+        <td colspan="2" align="center">
+            差分升级需要提供整包APK的checksum，以便合并<br>patch后验证包的完整性，整包升级不需要输入checksum
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4" align="center">
+            <input type="submit" value="提交升级文件">
+        </td>
+    </tr>
+
+</table></form>
+
+</body>
+</html>

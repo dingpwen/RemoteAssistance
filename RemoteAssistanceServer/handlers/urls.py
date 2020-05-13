@@ -4,6 +4,8 @@ from handlers.impl.FriendHandler import FriendHandler
 from handlers.impl.UserHandler import UserHandler
 from handlers.impl.ImageHandler import ImageHandler
 from handlers.impl.QrcodeHandler import QrcodeHandler
+from handlers.impl.FirmwareHandler import FirmwareHandler
+from handlers.impl.VersionHandler import VersionHandler
 from tornado.web import StaticFileHandler
 import os
 handlers = [
@@ -12,6 +14,8 @@ handlers = [
     (r'/friend/(.*)', FriendHandler),
     (r'/user/(.*)', UserHandler),
     (r'/image/(.*)', ImageHandler),
+    (r'/firmware/(.*)', FirmwareHandler),
+    (r'/version/(.*)', VersionHandler),
     (r'/qrcode/(.*)', QrcodeHandler),
     (r'/qr_image/(.*)', StaticFileHandler,
      {"path": os.path.join(os.path.dirname(__file__), "../static/qrcode"), "default_filename": "default.jpg"}),

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传固件版本</title>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js">
+    </script>
+</head>
+<body>
+
+<form method="post" enctype="multipart/form-data">
+<table border="0" align="center" cellpadding="20">
+    <tr>
+        <td width="126" align="center">升级文件：</td>
+        <td  align="center">
+            <input type="file" accept=".bin" id="file" name="file"/>
+        </td>
+    </tr>
+
+    <tr>
+        <td width="126" align="center">版本号：</td>
+        <td  align="center"><textarea rows="1" cols="60" placeholder="输入升级文件对应版本好" name="my_version">
+</textarea></td>
+    </tr>
+
+    <tr>
+        <td width="126" align="center">
+            <input type="submit" value="上传文件">
+        </td>
+        <td  align="center">
+
+        </td>
+    </tr>
+
+</table></form>
+
+</body>
+</html>
