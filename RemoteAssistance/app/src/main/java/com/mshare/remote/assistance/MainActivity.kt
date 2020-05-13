@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.mshare.remote.assistance.util.AudioUtils
+import com.mshare.remote.assistance.util.OkHttpUtil
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
@@ -119,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         val map = HashMap<String, String>()
         map[Constants.WS_MSG_TOKEN_SELF] = Constants.getUserToken(this)
         webSocketListener = MainWebSocketListener()
-        Constants.createWebSocket(Constants.getWSServerHost(), webSocketListener, map)
+        OkHttpUtil.createWebSocket(Constants.getWSServerHost(), webSocketListener, map)
     }
 
     private fun setRemoteImage(jpgBytes:ByteArray) {

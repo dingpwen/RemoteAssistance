@@ -1,5 +1,6 @@
 package com.mshare.remote.assistance.friend
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -54,6 +55,11 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
 
         mPresenter = FriendPresenter()
         mPresenter.attachView(this)
+        if(!mPresenter.checkAppVerion(this)){
+            mPresenter.startUpdateVersionService(this)
+            showProgress()
+            return
+        }
 
         initListView()
         var token = Constants.getUserToken(this, false)
@@ -133,6 +139,14 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
                     onError(Constants.ERROR_INVALID_TOKEN)
                 }
             }
+        } else if(Constants.REQUEST_CODE_VERSION == requestCode) {
+            val type = data!!.getIntExtra("type", 0)
+            if (type == 0) {
+                val progress = data.getIntExtra("progress", 0)
+                updateProgress(progress)
+            } else {
+                onUpdateComplete(type)
+            }
         }
     }
 
@@ -165,5 +179,32 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
     private fun gotoDeleteMode() {
         deleteMode = !deleteMode
         mAdaper.setDeleteMode(deleteMode)
+    }
+
+    /******************** 版本升级进度  */
+    private var mProgress: ProgressDialog? = null
+
+    private fun showProgress() {
+        val progress = ProgressDialog(this)
+        progress.setTitle(R.string.update_version_title)
+        progress.setIcon(R.mipmap.ic_launcher)
+        progress.setMessage(getString(R.string.update_version_content))
+        progress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+        progress.setCancelable(false)
+        mProgress = progress
+        progress.show()
+    }
+
+    private fun updateProgress(progress: Int) {
+        mProgress?.setProgress(progress)
+    }
+
+    fun onUpdateComplete(type: Int) {
+        if (mProgress!!.isShowing()) {
+            mProgress?.dismiss()
+            if (type == 1) {
+                finish()
+            }
+        }
     }
 }

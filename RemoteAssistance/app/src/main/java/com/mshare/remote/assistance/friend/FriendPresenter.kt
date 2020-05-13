@@ -1,8 +1,12 @@
 package com.mshare.remote.assistance.friend
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import com.mshare.remote.assistance.Constants
+import com.mshare.remote.assistance.util.OkHttpUtil
+import com.wen.app.update.ApkUtils
+import com.wen.app.update.UpdateVersionService
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
@@ -14,6 +18,14 @@ import java.lang.ref.WeakReference
 class FriendPresenter:Contact.IPresenter {
     private lateinit var mViewRef: WeakReference<Contact.IView>
     private lateinit var mModel:Contact.IModel
+
+    private var result: String? = null
+    //app update
+    private var apkVersion: Long = 0
+    private var apkType = 0
+    private var apkChecksum: String? = null
+    private var patchChecksum: String? = null
+
     override fun attachView(view: Contact.IView) {
         mViewRef = WeakReference(view)
         mModel = FriendModel()
@@ -114,5 +126,54 @@ class FriendPresenter:Contact.IPresenter {
                 }
             }
         }, 2)
+    }
+
+    override fun checkAppVerion(context: Context): Boolean {
+        if(!Constants.isWifiConnected(context)){
+            return true
+        }
+        val curVersion = ApkUtils.getVersionCode(context, context.packageName)
+        val map = HashMap<String, String>()
+        map["project"] = Constants.PROJECT
+        result = null
+        val th = Thread {
+            result = OkHttpUtil.baseSyncGet(Constants.getVersionUrl(), map)
+        }
+        th.start()
+        try {
+            th.join()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
+        if(result == null) {
+            return true
+        }
+        try{
+            val obj = JSONObject(result as String)
+            if(obj.getInt("status") != 200) {
+                return true
+            }
+            apkVersion = obj.getLong("version")
+            if(apkVersion > curVersion) {
+                apkType = obj.getInt("type")
+                apkChecksum = obj.getString("checksum1")
+                patchChecksum = obj.getString("checksum2")
+                return false
+            }
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        return true
+    }
+
+    override fun startUpdateVersionService(context: Context) {
+        val intent = Intent(context, UpdateVersionService::class.java)
+        intent.putExtra("type", apkType)
+        intent.putExtra("version", apkVersion)
+        intent.putExtra("checksum1", apkChecksum)
+        intent.putExtra("checksum2", patchChecksum)
+        val pendingIntent = (context as FriendListActivity).createPendingResult(Constants.REQUEST_CODE_VERSION, Intent(), 0)
+        intent.putExtra("pendingIntent", pendingIntent)
+        context.startService(intent)
     }
 }

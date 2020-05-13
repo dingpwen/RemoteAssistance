@@ -62,6 +62,14 @@
         <activity
             android:name="com.google.zxing.activity.CaptureActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <service
+            android:name="com.wen.app.update.UpdateVersionService"
+            android:exported="false"
+            android:process=":update">
+            <intent-filter>
+                <action android:name="com.wen.app.update.UpdateVersionService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

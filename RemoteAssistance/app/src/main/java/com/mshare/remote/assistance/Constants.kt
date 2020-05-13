@@ -1,16 +1,13 @@
 package com.mshare.remote.assistance
 import android.content.Context
 import android.content.SharedPreferences
-import android.text.TextUtils
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Base64
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocketListener
+import com.mshare.remote.assistance.util.OkHttpUtil
+import java.io.File
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.concurrent.TimeUnit
 
 object Constants{
     private var DEBUG_MODE = false
@@ -30,38 +27,14 @@ object Constants{
     const val DATA_TYPE_IMAGE:Byte = 0
     const val DATA_TYPE_AUDIO:Byte = 1
     const val WS_CONN_RETRY_TIMES = 5
-    private const val READ_TIMEOUT:Long = 5
-    private const val CONN_TIMEOUT:Long = 5
+
+    const val PROJECT = "Assistance"
+    const val PACKAGE = "com.mshare.remote.assistance"
 
     fun getWSServerHost():String {
         return if(DEBUG_MODE) WS_SERVER_LOCAL else WS_SERVER_REMOTE
     }
 
-    private fun addParamToUrl(url:String, params:Map<*, *>):String{
-        val httpUrl: HttpUrl.Builder = url.toHttpUrlOrNull()?.newBuilder()
-                ?: return ""
-        for(entry in params.entries){
-            httpUrl.addQueryParameter(entry.key as String,entry.value as String)
-        }
-        return httpUrl.build().toString()
-    }
-
-    fun createWebSocket(webUrl: String, wsl: WebSocketListener, params: Map<String, String>)  {
-        if(TextUtils.isEmpty(webUrl)) {
-            return
-        }
-        val httpClient = OkHttpClient.Builder()
-            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
-            .connectTimeout(CONN_TIMEOUT, TimeUnit.SECONDS)
-            .build()
-        var url:String = addParamToUrl("http://localhost/test", params)
-        url = url.replace("http://localhost/test", webUrl)
-        val request = Request.Builder().url(url).build()
-        httpClient.newWebSocket(request, wsl)
-        httpClient.dispatcher.executorService.shutdown()
-    }
-
-    val httpClient = OkHttpClient()
     private const val HTTP_SERVER_LOCAL = "http$SERVER_LOCAL_BASE"
     private const val HTTP_SERVER_REMOTE = "http$SERVER_REMOTE_BASE"
     private const val URL_FRIEND_BASE = "friend"
@@ -123,7 +96,7 @@ object Constants{
         val map = HashMap<String, String>()
         map["token"] = token
         map["image"] = url
-        return addParamToUrl(hostUrl, map)
+        return OkHttpUtil.addParamToUrl(hostUrl, map)
     }
 
     fun encodeString(content:String):String {
@@ -196,6 +169,8 @@ object Constants{
     const val USER_LOGIN_STATUS = "login_state"
     const val USER_LOGIN_STATUS_OFF = 0
     const val USER_LOGIN_STATUS_ON = 1
+    private const val URL_VERSION_BASE = "version"
+    const val REQUEST_CODE_VERSION = 0x124
 
     fun setLoginStatus(context:Context, status:Int) {
         context.getSharedPreferences(SHARES_FILE, Context.MODE_PRIVATE).edit()
@@ -205,5 +180,28 @@ object Constants{
 
     fun getLoginStatus(context:Context):Int {
         return context.getSharedPreferences(SHARES_FILE, Context.MODE_PRIVATE).getInt(USER_LOGIN_STATUS, USER_LOGIN_STATUS_OFF)
+    }
+
+    fun getNewApkPath(context: Context): String {
+        return context.applicationContext.getExternalFilesDir(null).toString() + File.separator + "viwalk_new.apk"
+    }
+
+    fun getPatchPath(context: Context): String {
+        return context.applicationContext.getExternalFilesDir(null).toString() + File.separator + "apk.patch"
+    }
+
+    fun getVersionUrl(): String {
+        return getServerHost() + URL_VERSION_BASE + "/newest"
+    }
+
+    fun getVersionDataUrl(): String {
+        return getServerHost() + URL_VERSION_BASE + "/patch"
+    }
+
+    fun isWifiConnected(context: Context): Boolean {
+        val manager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val cap = manager.getNetworkCapabilities(manager.activeNetwork)
+        return cap != null && cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
 }
