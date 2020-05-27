@@ -20,7 +20,7 @@ interface Contact {
         fun loadData(token:String)
         fun addOrRemoveFriend(token:String, friendToken:String, type:Int)
         fun addUser(context: Context, token:String, category:String, needSaved:Boolean)
-        fun checkAppVerion(context: Context):Boolean
+        fun checkAppVersion(context: Context):Boolean
         fun startUpdateVersionService(context: Context)
     }
 }

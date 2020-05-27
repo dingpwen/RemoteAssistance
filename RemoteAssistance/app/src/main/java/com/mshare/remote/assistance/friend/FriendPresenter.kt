@@ -7,6 +7,10 @@ import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.util.OkHttpUtil
 import com.wen.app.update.ApkUtils
 import com.wen.app.update.UpdateVersionService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
@@ -128,7 +132,7 @@ class FriendPresenter:Contact.IPresenter {
         }, 2)
     }
 
-    override fun checkAppVerion(context: Context): Boolean {
+    override fun checkAppVersion(context: Context): Boolean {
         if(!Constants.isWifiConnected(context)){
             return true
         }
@@ -136,14 +140,10 @@ class FriendPresenter:Contact.IPresenter {
         val map = HashMap<String, String>()
         map["project"] = Constants.PROJECT
         result = null
-        val th = Thread {
-            result = OkHttpUtil.baseSyncGet(Constants.getVersionUrl(), map)
-        }
-        th.start()
-        try {
-            th.join()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
+        runBlocking {
+            result = GlobalScope.async(Dispatchers.IO) {
+                return@async OkHttpUtil.baseSyncGet(Constants.getVersionUrl(), map)
+            }.await()
         }
         if(result == null) {
             return true

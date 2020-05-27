@@ -237,11 +237,22 @@ public final class ViewfinderView extends View {
     paint.setShader(null);
   }
 
+  //private StringBuilder sb = new StringBuilder();
   //处理颜色模糊
   public int shadeColor(int color) {
-    String hax = Integer.toHexString(color);
+    color = (color << 8) >> 8;
+    if(color < 0) {
+      color = color ^ 0xFF000000;
+    }
+    color += 0x20000000;
+    return color;
+    /*sb.delete(0, sb.length());
+    sb.append(Integer.toHexString(color));
+    sb.replace(0, 2, "20");
+    return Integer.valueOf(sb.toString(), 16);*/
+    /*String hax = Integer.toHexString(color);
     String result = "20"+hax.substring(2);
-    return Integer.valueOf(result, 16);
+    return Integer.valueOf(result, 16);*/
   }
 
   // 绘制扫描区边框 Draw a two pixel solid black border inside the framing rect

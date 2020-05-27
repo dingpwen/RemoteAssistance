@@ -18,6 +18,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.mshare.remote.assistance.util.AudioUtils
 import com.mshare.remote.assistance.util.OkHttpUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
@@ -104,12 +108,12 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if(requestCode == 1) {
             //do something
-            needCheckPermission = false;
+            needCheckPermission = false
         }
     }
 
     private fun setRecordEnable(enable:Boolean) {
-        runOnUiThread {
+        GlobalScope.launch(Dispatchers.Main){
             recordBtn.isEnabled = enable
         }
     }
@@ -253,7 +257,8 @@ class MainActivity : AppCompatActivity() {
     private var bufferSizeInBytes = 0
     private var audioRecord: AudioRecord? = null
     @Volatile private var isRecording = false
-    private var curRecordThread:AudioRecordThread? = null
+    //private var curRecordThread:AudioRecordThread? = null
+    private var curRecordJob: Job? = null
 
     private fun createAudioRecord() {
         bufferSizeInBytes = AudioRecord.getMinBufferSize(AudioUtils.AUDIO_SAMPLE_RATE, AudioUtils.CHANNEL_CONFIG, AudioUtils.AUDIO_FORMAT)
@@ -270,16 +275,15 @@ class MainActivity : AppCompatActivity() {
         audioRecord?.startRecording()
         isRecording = true
         recordBtn.setText(R.string.in_record)
-        curRecordThread = AudioRecordThread()
-        curRecordThread?.start()
+        curRecordJob = GlobalScope.launch { doAudioRecord() }
         return AudioUtils.SUCCESS
     }
 
     private fun stopRecord() {
         if(audioRecord != null) {
             isRecording = false
-            curRecordThread?.interrupt()
-            curRecordThread = null
+            curRecordJob?.cancel()
+            curRecordJob = null
             audioRecord?.stop()
             audioRecord?.release()
             audioRecord = null
@@ -287,7 +291,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private inner class AudioRecordThread:Thread(){
+    private fun doAudioRecord(){
+        val audioBuffer:ByteBuffer = ByteBuffer.allocateDirect(bufferSizeInBytes * 100).order(ByteOrder.LITTLE_ENDIAN)
+        var readSize:Int
+        try {
+            while (isRecording) {
+                readSize = audioRecord!!.read(audioBuffer, audioBuffer.capacity())
+                if (readSize == AudioRecord.ERROR_INVALID_OPERATION || readSize == AudioRecord.ERROR_BAD_VALUE) {
+                    Log.d("wenpd", "Could not read audio data")
+                    break
+                }
+                webSocketListener.sendByteMsg(audioBuffer.toByteString(), Constants.DATA_TYPE_AUDIO)
+                audioBuffer.clear()
+            }
+        } catch (e:InterruptedException) {
+            e.printStackTrace()
+        }
+    }
+
+    /*private inner class AudioRecordThread:Thread(){
         override fun run() {
             val audioBuffer:ByteBuffer = ByteBuffer.allocateDirect(bufferSizeInBytes * 100).order(ByteOrder.LITTLE_ENDIAN)
             var readSize:Int
@@ -305,5 +327,5 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
-    }
+    }*/
 }

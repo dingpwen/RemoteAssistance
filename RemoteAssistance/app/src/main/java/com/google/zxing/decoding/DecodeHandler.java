@@ -62,6 +62,9 @@ final class DecodeHandler extends Handler {
     }
   }
 
+  private byte[] rotatedData;
+  private int data_len = 0;
+
   /**
    * Decode the data within the viewfinder rectangle, and time how long it took. For efficiency,
    * reuse the same reader objects from one decode to the next.
@@ -75,7 +78,11 @@ final class DecodeHandler extends Handler {
     Result rawResult = null;
     
     //modify here
-    byte[] rotatedData = new byte[data.length];
+    //byte[] rotatedData = new byte[data.length];
+    if(data_len != data.length) {
+        rotatedData = new byte[data.length];
+        data_len = data.length;
+    }
     for (int y = 0; y < height; y++) {
         final int hy = height - y - 1;
         final int wy = y * width;

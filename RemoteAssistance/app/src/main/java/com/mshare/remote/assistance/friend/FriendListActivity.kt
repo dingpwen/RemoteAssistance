@@ -9,16 +9,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.activity.CaptureActivity
 import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.QrcodeActivity
-import kotlinx.android.synthetic.main.activity_friend_list.*
 import com.mshare.remote.assistance.R
 import com.mshare.remote.assistance.SettingsActivity
+import kotlinx.android.synthetic.main.activity_friend_list.*
 import java.lang.ref.WeakReference
 
 class FriendListActivity : AppCompatActivity(), Contact.IView {
@@ -55,7 +55,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
 
         mPresenter = FriendPresenter()
         mPresenter.attachView(this)
-        if(!mPresenter.checkAppVerion(this)){
+        if(!mPresenter.checkAppVersion(this)){
             mPresenter.startUpdateVersionService(this)
             showProgress()
             return
@@ -120,7 +120,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
     }
 
     private fun showErrorMsg(errorMsg: String) {
-        Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
+        Snackbar.make(mEmptyView, errorMsg, Snackbar.LENGTH_LONG).show()
     }
 
     private fun scanForAdd() {
@@ -181,9 +181,10 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         mAdaper.setDeleteMode(deleteMode)
     }
 
-    /******************** 版本升级进度  */
+    /******************** 鐗堟湰鍗囩骇杩涘害  */
     private var mProgress: ProgressDialog? = null
 
+    @Suppress("DEPRECATION")
     private fun showProgress() {
         val progress = ProgressDialog(this)
         progress.setTitle(R.string.update_version_title)
@@ -196,10 +197,10 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
     }
 
     private fun updateProgress(progress: Int) {
-        mProgress?.setProgress(progress)
+        mProgress?.progress = progress
     }
 
-    fun onUpdateComplete(type: Int) {
+    private fun onUpdateComplete(type: Int) {
         if (mProgress!!.isShowing()) {
             mProgress?.dismiss()
             if (type == 1) {
