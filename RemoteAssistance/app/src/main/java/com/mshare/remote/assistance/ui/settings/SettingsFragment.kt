@@ -22,14 +22,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
         class ConfirmationDialog(viewModel: SettingsViewModel): DialogFragment() {
             private val viewModelReference = WeakReference<SettingsViewModel>(viewModel)
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-                return AlertDialog.Builder(activity!!)
+                return AlertDialog.Builder(requireActivity())
                         .setMessage(R.string.request_permission)
-                        .setPositiveButton(android.R.string.ok) { dialog, which ->
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
                             viewModelReference.get()!!.login.value = false
                             Constants.setLoginStatus(activity as Context, Constants.USER_LOGIN_STATUS_OFF)
                         }
                         .setNegativeButton(android.R.string.cancel
-                        ) { dialog, which ->
+                        ) { _, _ ->
                             //do nothing
                         }
                         .create()
@@ -46,7 +46,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         viewModel = ViewModelProviders.of(this).get(SettingsViewModel::class.java)
         loginPreference = preferenceScreen.findPreference("login")
         logoutPreference = preferenceScreen.findPreference("logout")
-        viewModel.login.observe(this, Observer {
+        viewModel.login.observe(viewLifecycleOwner, Observer {
             if(it) {
                 preferenceScreen.removePreference(loginPreference)
                 preferenceScreen.addPreference(logoutPreference)

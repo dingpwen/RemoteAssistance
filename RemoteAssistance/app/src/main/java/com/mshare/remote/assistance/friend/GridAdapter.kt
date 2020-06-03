@@ -12,14 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.MainActivity
+import com.mshare.remote.assistance.friend.model.FriendEntity
 
-class GridAdapter(context: Context,  presenter: Contact.IPresenter): RecyclerView.Adapter<GridAdapter.GridViewHolder>() {
+class GridAdapter(context: Context): RecyclerView.Adapter<GridAdapter.GridViewHolder>() {
     private val mContext = context
-    private var mFriendList:MutableList<FriendInfo> = ArrayList()
+    private var mFriendList:List<FriendEntity> = ArrayList()
     private var deleteMode = false
-    private val mPresenter = presenter
 
-    fun setData(friendList:MutableList<FriendInfo>) {
+    fun setData(friendList:List<FriendEntity>) {
         mFriendList = friendList
         notifyDataSetChanged()
     }
@@ -58,7 +58,8 @@ class GridAdapter(context: Context,  presenter: Contact.IPresenter): RecyclerVie
         if(deleteMode) {
             holder.delete.visibility = View.VISIBLE
             holder.delete.setOnClickListener {
-                mPresenter.addOrRemoveFriend(Constants.getUserToken(mContext), mFriendList.get(position).user_token, 2)
+                //mPresenter.addOrRemoveFriend(Constants.getUserToken(mContext), mFriendList.get(position).user_token, 2)
+                mDeleteLister?.onDelete(mFriendList[position].user_token)
             }
         } else {
             holder.delete.visibility = View.GONE
@@ -71,8 +72,16 @@ class GridAdapter(context: Context,  presenter: Contact.IPresenter): RecyclerVie
         val delete:TextView = itemView.findViewById(R.id.delete)
     }
 
-    public fun setDeleteMode(deleteMode:Boolean) {
+    fun setDeleteMode(deleteMode:Boolean) {
         this.deleteMode = deleteMode
         notifyDataSetChanged()
+    }
+
+    interface DeleteLister{
+        fun onDelete(friendToken:String)
+    }
+    private var mDeleteLister:DeleteLister? = null
+    fun setDeleteLister(listener: DeleteLister) {
+        mDeleteLister = listener
     }
 }

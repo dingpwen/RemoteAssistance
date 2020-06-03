@@ -1,37 +1,52 @@
 package com.mshare.remote.assistance.friend
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.activity.CaptureActivity
 import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.QrcodeActivity
 import com.mshare.remote.assistance.R
 import com.mshare.remote.assistance.SettingsActivity
+import com.mshare.remote.assistance.friend.model.FriendEntity
+import com.mshare.remote.assistance.util.OkHttpUtil
+import com.wen.app.update.ApkUtils
+import com.wen.app.update.UpdateVersionService
 import kotlinx.android.synthetic.main.activity_friend_list.*
+import kotlinx.coroutines.*
+import org.json.JSONException
+import org.json.JSONObject
+import wen.mmvm.arch.Result
 import java.lang.ref.WeakReference
 
-class FriendListActivity : AppCompatActivity(), Contact.IView {
-    private lateinit var mPresenter:Contact.IPresenter
+class FriendListActivity : AppCompatActivity() {
     private lateinit var mAdaper:GridAdapter
     private lateinit var mEmptyView: TextView
-    private val mHandler = MainHadler(this@FriendListActivity)
+    private val mHandler = MainHandler(this@FriendListActivity)
     private var deleteMode = false
+    private lateinit var viewModel: FriendViewModel
+    private lateinit var refreshLayout:SwipeRefreshLayout
 
     companion object{
         private const val REQUEST_CODE_SCAN = 0x123
         private const val ERROR_MSG = 1018
-        private class MainHadler(activity:FriendListActivity):Handler() {
+        private val NO_FRIEND = arrayListOf<FriendEntity>()
+        private class MainHandler(activity:FriendListActivity):Handler() {
             private val mActivity = WeakReference(activity)
             override fun handleMessage(msg: Message) {
                 super.handleMessage(msg)
@@ -52,49 +67,89 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friend_list)
         setSupportActionBar(toolbar)
+        OkHttpUtil.initHttpClientCache(this)
 
-        mPresenter = FriendPresenter()
-        mPresenter.attachView(this)
-        if(!mPresenter.checkAppVersion(this)){
-            mPresenter.startUpdateVersionService(this)
+        if(!checkAppVersion(this)){
             showProgress()
             return
         }
+        viewModel = ViewModelProviders.of(this).get(FriendViewModel::class.java)
 
         initListView()
         var token = Constants.getUserToken(this, false)
         if(token == "") {
             token = Constants.getUserToken(this, true)
-            mPresenter.addUser(this, token, "2",true)
+            Constants.saveUserToken(this, token)
+            viewModel.addUser(token, "2").observe(this, Observer{
+                if(it is Result.Error){
+                    Constants.saveUserToken(this, "")
+                }
+            })
             mEmptyView.setText(R.string.friend_list_empty)
             mEmptyView.visibility = View.VISIBLE
+            refreshLayout.isRefreshing = false
         } else {
-            mPresenter.loadData(token)
+            viewModel.getAllFriends().observe(this, Observer {
+                if(it is Result.Loading) {
+                    showErrorMsg(it.message)
+                } else if(it is Result.Success) {
+                    setData(it.data)
+                    refreshLayout.isRefreshing = false
+                }
+            })
         }
-
+        viewModel.mErrorType.observe(this,  Observer{
+            if(it != 0) {
+                onError(it)
+            }
+        })
         fab.setOnClickListener {
             scanForAdd()
         }
     }
 
     private fun initListView() {
-        mAdaper = GridAdapter(this, mPresenter)
+        mAdaper = GridAdapter(this)
         findViewById<RecyclerView>(R.id.friend_list).let{
             it.layoutManager = GridLayoutManager(this, 2)
             it.setHasFixedSize(false)
             it.adapter = mAdaper
         }
+        mAdaper.setDeleteLister(object:GridAdapter.DeleteLister{
+            override fun onDelete(friendToken: String) {
+                viewModel.addOrRemoveFriend(Constants.getUserToken(this@FriendListActivity), friendToken, 2)
+            }
+
+        })
         mEmptyView = findViewById(R.id.empty_view)
+        refreshLayout = findViewById(R.id.refresh)
+        refreshLayout.setProgressViewOffset(false, 0,
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 28F, resources.displayMetrics).toInt()
+        )
+
+        refreshLayout.setOnRefreshListener {
+            mEmptyView.postDelayed({
+                viewModel.updateCache()
+            }, 2000)
+        }
+        refreshLayout.setProgressBackgroundColorSchemeResource(android.R.color.white)
+        refreshLayout.setColorSchemeResources(android.R.color.holo_blue_light,
+                android.R.color.holo_red_light, android.R.color.holo_orange_light,
+                android.R.color.holo_green_light)
+        refreshLayout.isRefreshing = true
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mPresenter.detachView()
     }
 
-    override fun setData(friendList: MutableList<FriendInfo>) = runOnUiThread{
-        mAdaper.setData(friendList)
-        if(friendList.size == 0) {
+    private fun setData(friendList: List<FriendEntity>?) = GlobalScope.launch(Dispatchers.Main){
+        if(friendList == null) {
+            mAdaper.setData(NO_FRIEND)
+        } else {
+            mAdaper.setData(friendList)
+        }
+        if(friendList == null || friendList.isEmpty()) {
             mEmptyView.setText(R.string.friend_list_empty)
             mEmptyView.visibility = View.VISIBLE
         } else {
@@ -102,7 +157,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
         }
     }
 
-    override fun onError(type: Int) {
+    private fun onError(type: Int) {
         val errorMsg:String = when(type) {
             Constants.ERROR_TYPE_NET -> getString(R.string.error_msg_net)
             Constants.ERROR_TYPE_JSON -> getString(R.string.error_msg_json)
@@ -134,7 +189,7 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
             if(resultCode == 0xA1) {
                 val token = data?.extras?.getString ("qr_scan_result")?:return
                 if(Constants.checkUserToken(token)) {
-                    mPresenter.addOrRemoveFriend(Constants.getUserToken(this), token, 1)
+                    viewModel.addOrRemoveFriend(Constants.getUserToken(this), token, 1)
                 } else {
                     onError(Constants.ERROR_INVALID_TOKEN)
                 }
@@ -182,6 +237,54 @@ class FriendListActivity : AppCompatActivity(), Contact.IView {
     }
 
     /******************** 版本升级进度  */
+    private var result:String? = null
+    private fun checkAppVersion(context: Context): Boolean {
+        if(!Constants.isWifiConnected(context)){
+            return true
+        }
+        val curVersion = ApkUtils.getVersionCode(context, context.packageName)
+        val map = HashMap<String, String>()
+        map["project"] = Constants.PROJECT
+        result = null
+        runBlocking {
+            result = GlobalScope.async(Dispatchers.IO) {
+                return@async OkHttpUtil.baseSyncGet(Constants.getVersionUrl(), map)
+            }.await()
+        }
+        if(result == null) {
+            return true
+        }
+        try{
+            val obj = JSONObject(result as String)
+            if(obj.getInt("status") != 200) {
+                return true
+            }
+            val apkVersion = obj.getLong("version")
+            if(apkVersion > curVersion) {
+                val apkType = obj.getInt("type")
+                val apkChecksum = obj.getString("checksum1")
+                val patchChecksum = obj.getString("checksum2")
+                startUpdateVersionService(apkVersion, apkType, apkChecksum, patchChecksum)
+                return false
+            }
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        return true
+    }
+
+
+    private fun startUpdateVersionService(apkVersion: Long, apkType: Int, apkChecksum: String, patchChecksum: String) {
+        val intent = Intent(this, UpdateVersionService::class.java)
+        intent.putExtra("type", apkType)
+        intent.putExtra("version", apkVersion)
+        intent.putExtra("checksum1", apkChecksum)
+        intent.putExtra("checksum2", patchChecksum)
+        val pendingIntent = createPendingResult(Constants.REQUEST_CODE_VERSION, Intent(), 0)
+        intent.putExtra("pendingIntent", pendingIntent)
+        startService(intent)
+    }
+
     private var mProgress: ProgressDialog? = null
 
     @Suppress("DEPRECATION")

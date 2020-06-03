@@ -8,6 +8,9 @@ import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.ui.login.data.LoginResult
 import com.mshare.remote.assistance.ui.login.data.Result
 import com.mshare.remote.assistance.ui.login.data.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
@@ -92,13 +95,13 @@ class LoginViewModel: ViewModel() {
     }
 
     private fun setResultSuccess(user:User) {
-        Handler(Looper.getMainLooper()).post {
+        GlobalScope.launch(Dispatchers.Main) {
             loginResult.value = LoginResult(Result.Success(user), 0)
         }
     }
 
     private fun setResultError(type: Int, e:Exception) {
-        Handler(Looper.getMainLooper()).post {
+        GlobalScope.launch(Dispatchers.Main) {
             loginResult.value = LoginResult(Result.Error(e), type)
         }
     }

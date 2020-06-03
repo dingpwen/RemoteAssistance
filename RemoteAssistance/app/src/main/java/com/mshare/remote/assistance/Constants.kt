@@ -204,4 +204,13 @@ object Constants{
         val cap = manager.getNetworkCapabilities(manager.activeNetwork)
         return cap != null && cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
     }
+
+    fun isNetConnected(context: Context): Boolean {
+        val manager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val cap = manager.getNetworkCapabilities(manager.activeNetwork)
+        return cap != null && (cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                || cap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || cap.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+    }
 }
