@@ -1,7 +1,6 @@
 package com.mshare.remote.assistance.friend.worker
 
 import android.content.Context
-import androidx.work.Data
 import androidx.work.WorkerParameters
 import com.mshare.remote.assistance.Constants
 

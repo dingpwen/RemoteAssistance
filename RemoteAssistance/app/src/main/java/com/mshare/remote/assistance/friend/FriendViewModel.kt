@@ -8,6 +8,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.mshare.remote.assistance.friend.model.FriendEntity
 import com.mshare.remote.assistance.friend.model.FriendRepository
+import com.mshare.remote.assistance.friend.model.VersionEntity
 import wen.mmvm.arch.Result
 
 class FriendViewModel(application: Application):AndroidViewModel(application) {
@@ -56,5 +57,9 @@ class FriendViewModel(application: Application):AndroidViewModel(application) {
             }
         }
         return mAddObserver as LiveData<Result<Int>>
+    }
+
+    fun checkVersion(curVersion: Long):LiveData<Result<VersionEntity>> {
+        return friendRepository.checkVersion(curVersion);
     }
 }

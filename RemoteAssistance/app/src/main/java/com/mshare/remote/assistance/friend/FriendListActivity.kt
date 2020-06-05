@@ -24,6 +24,7 @@ import com.mshare.remote.assistance.QrcodeActivity
 import com.mshare.remote.assistance.R
 import com.mshare.remote.assistance.SettingsActivity
 import com.mshare.remote.assistance.friend.model.FriendEntity
+import com.mshare.remote.assistance.friend.model.VersionEntity
 import com.mshare.remote.assistance.util.OkHttpUtil
 import com.wen.app.update.ApkUtils
 import com.wen.app.update.UpdateVersionService
@@ -69,11 +70,14 @@ class FriendListActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         OkHttpUtil.initHttpClientCache(this)
 
-        if(!checkAppVersion(this)){
-            showProgress()
-            return
-        }
         viewModel = ViewModelProviders.of(this).get(FriendViewModel::class.java)
+        val curVersion = ApkUtils.getVersionCode(this, packageName)
+        viewModel.checkVersion(curVersion).observe(this, Observer {
+            if(it is Result.Success) {
+                showProgress()
+                upgrade(it.data)
+            }
+        })
 
         initListView()
         var token = Constants.getUserToken(this, false)
@@ -237,49 +241,12 @@ class FriendListActivity : AppCompatActivity() {
     }
 
     /******************** 版本升级进度  */
-    private var result:String? = null
-    private fun checkAppVersion(context: Context): Boolean {
-        if(!Constants.isWifiConnected(context)){
-            return true
-        }
-        val curVersion = ApkUtils.getVersionCode(context, context.packageName)
-        val map = HashMap<String, String>()
-        map["project"] = Constants.PROJECT
-        result = null
-        runBlocking {
-            result = GlobalScope.async(Dispatchers.IO) {
-                return@async OkHttpUtil.baseSyncGet(Constants.getVersionUrl(), map)
-            }.await()
-        }
-        if(result == null) {
-            return true
-        }
-        try{
-            val obj = JSONObject(result as String)
-            if(obj.getInt("status") != 200) {
-                return true
-            }
-            val apkVersion = obj.getLong("version")
-            if(apkVersion > curVersion) {
-                val apkType = obj.getInt("type")
-                val apkChecksum = obj.getString("checksum1")
-                val patchChecksum = obj.getString("checksum2")
-                startUpdateVersionService(apkVersion, apkType, apkChecksum, patchChecksum)
-                return false
-            }
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-        return true
-    }
-
-
-    private fun startUpdateVersionService(apkVersion: Long, apkType: Int, apkChecksum: String, patchChecksum: String) {
+    private fun upgrade(version: VersionEntity) {
         val intent = Intent(this, UpdateVersionService::class.java)
-        intent.putExtra("type", apkType)
-        intent.putExtra("version", apkVersion)
-        intent.putExtra("checksum1", apkChecksum)
-        intent.putExtra("checksum2", patchChecksum)
+        intent.putExtra("type", version.apkType)
+        intent.putExtra("version", version.apkVersion)
+        intent.putExtra("checksum1", version.apkChecksum)
+        intent.putExtra("checksum2", version.patchChecksum)
         val pendingIntent = createPendingResult(Constants.REQUEST_CODE_VERSION, Intent(), 0)
         intent.putExtra("pendingIntent", pendingIntent)
         startService(intent)

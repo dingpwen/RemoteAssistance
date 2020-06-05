@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.work.WorkerParameters
 import com.mshare.remote.assistance.Constants
 
-class FriendListWorker(context: Context, workerParams: WorkerParameters):
+class CheckVersionWorker (context: Context, workerParams: WorkerParameters):
     BaseWorker(context, workerParams) {
     override fun getParams(): HashMap<String, String> {
         val map = HashMap<String, String>()
-        val token = inputData.getString(Constants.WS_MSG_TOKEN_SELF) ?: return map
-        map[Constants.WS_MSG_TOKEN_SELF] = token
+        val project = inputData.getString("project") ?: Constants.PROJECT
+        val version = inputData.getLong("version", 1)
+        map["project"] = project
+        map["version"] = "" + version
         return map
     }
 }

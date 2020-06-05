@@ -118,23 +118,42 @@ class FriendRepository(application: Application) {
             if (it != null && it.state == WorkInfo.State.SUCCEEDED) {
                 result.removeSource(workerInfo)
                 val response = it.outputData.getString(BaseWorker.HTTP_RESPONSE)
-                if(response != null) {
-                    try{
-                        val obj = JSONObject(response)
-                        val status = obj.getInt("status")
-                        if(status == 200) {
-                            result.value = Result.Success(200)
-                            return@addSource
-                        }
-                    } catch (e: JSONException) {
-                        result.value = Result.Error(e, Constants.ERROR_TYPE_JSON)
-                        return@addSource
-                    }
-                }
-                result.value = Result.Error(Exception("Failed to add user"), Constants.ERROR_TYPE_ADD)
+                result.postValue(parsePostData(response, 1))
             } else if(it != null && (it.state == WorkInfo.State.FAILED || it.state == WorkInfo.State.CANCELLED)){
                 result.removeSource(workerInfo)
                 result.value = Result.Error(Exception("Failed to add user"), Constants.ERROR_TYPE_ADD)
+            }
+        }
+        return result
+    }
+
+    fun checkVersion(curVersion: Long):LiveData<Result<VersionEntity>> {
+        val result = MediatorLiveData<Result<VersionEntity>>()
+        val workerInfo = FriendWorkerFactory.startCheckVersionWorker(app, curVersion)
+        result.addSource(workerInfo) {
+            if (it != null && it.state == WorkInfo.State.SUCCEEDED) {
+                result.removeSource(workerInfo)
+                val response = it.outputData.getString(BaseWorker.HTTP_RESPONSE)
+                if(response == null) {
+                    return@addSource
+                }
+                try{
+                    val obj = JSONObject(response)
+                    if(obj.getInt("status") == 200) {
+                        val apkVersion = obj.getLong("version")
+                        if(apkVersion > curVersion) {
+                            val apkType = obj.getInt("type")
+                            val apkChecksum = obj.getString("checksum1")
+                            val patchChecksum = obj.getString("checksum2")
+                            result.value = Result.Success(
+                                VersionEntity(apkType, apkVersion, apkChecksum, patchChecksum))
+                        }
+                    }
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+            } else if(it != null && (it.state == WorkInfo.State.FAILED || it.state == WorkInfo.State.CANCELLED)){
+                result.removeSource(workerInfo)
             }
         }
         return result

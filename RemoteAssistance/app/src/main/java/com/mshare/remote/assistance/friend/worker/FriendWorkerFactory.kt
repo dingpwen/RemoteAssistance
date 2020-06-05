@@ -60,4 +60,22 @@ object FriendWorkerFactory {
             .enqueueUniqueWork("UserAddWorker", ExistingWorkPolicy.REPLACE, addRequest)
         return WorkManager.getInstance(context).getWorkInfoByIdLiveData(addRequest.id)
     }
+
+    fun startCheckVersionWorker(context: Context, curVersion: Long): LiveData<WorkInfo> {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .build()
+        val data = Data.Builder()
+            .putString("project", Constants.PROJECT)
+            .putLong("version", curVersion)
+            .putString(BaseWorker.HTTP_URL, Constants.getVersionUrl())
+            .build()
+        val checkRequest =  OneTimeWorkRequest.Builder(CheckVersionWorker::class.java)
+            .setConstraints(constraints)
+            .setInputData(data)
+            .build()
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork("CheckVersionWorker", ExistingWorkPolicy.REPLACE, checkRequest)
+        return WorkManager.getInstance(context).getWorkInfoByIdLiveData(checkRequest.id)
+    }
 }
