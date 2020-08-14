@@ -90,7 +90,8 @@ class DetailActivity : AppCompatActivity() {
     private fun loadInfo() {
         val map = HashMap<String, String>()
         map[Constants.WS_MSG_TOKEN_SELF] = mToken
-        OkHttpUtil.baseGet(Constants.getUserInfoUrl(), map, callback = object:Callback{
+        val url =  Constants.getUserInfoUrl()
+        OkHttpUtil.baseGet(url, map, callback = object:Callback{
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
             }
@@ -101,6 +102,7 @@ class DetailActivity : AppCompatActivity() {
                     val obj = JSONObject(result)
                     val status = obj.getInt("status")
                     if(status == 200) {
+                        OkHttpUtil.removeFromNoCacheSet(url)
                         val user = obj.getJSONObject("user")
                         val name = user.getString("name")
                         val imgUrl = user.getString("imageUrl")
@@ -234,6 +236,7 @@ class DetailActivity : AppCompatActivity() {
                         val obj = JSONObject(result)
                         val status = obj.getInt("status")
                         if(status == 200) {
+                            OkHttpUtil.addToNoCacheSet(Constants.getUserInfoUrl())
                             onSaveDone()
                         }
                     }catch (e: JSONException) {

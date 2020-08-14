@@ -14,6 +14,9 @@ object OkHttpUtil {
     private const val WRITE_TIMEOUT: Long = 5
     private const val CONN_TIMEOUT: Long = 5
     private const val CACHE_SIZE: Long = 10 * 1024 * 1024
+    private val noCacheSet = mutableSetOf<String>()
+    private val defaultCacheControl =
+        CacheControl.Builder().maxAge(360, TimeUnit.SECONDS).build()
 
     @Synchronized fun initHttpClientCache(context: Context) {
         if(!initial) {
@@ -22,6 +25,14 @@ object OkHttpUtil {
                 .addNetworkInterceptor(interceptor)
             initial = true
         }
+    }
+
+    @Synchronized fun addToNoCacheSet(url: String) {
+        noCacheSet.add(url)
+    }
+
+    @Synchronized fun removeFromNoCacheSet(url: String) {
+        noCacheSet.remove(url)
     }
 
     fun addParamToUrl(url: String, params: Map<*, *>?): String {
@@ -38,9 +49,11 @@ object OkHttpUtil {
 
     fun baseGet(url:String, params: Map<*, *>, callback: Callback) {
         val httpClient = httpBuilder.build()
+        val noCache = noCacheSet.contains(url)
         val request: Request = Request.Builder()
-                .url(addParamToUrl(url, params))
-                .build()
+            .url(addParamToUrl(url, params))
+            .cacheControl(if(noCache) CacheControl.FORCE_NETWORK else defaultCacheControl)
+            .build()
         httpClient.newCall(request).enqueue(callback)
     }
 
@@ -60,14 +73,17 @@ object OkHttpUtil {
 
     fun baseSyncGet(url: String, params: Map<*, *>?): String? {
         val httpClient = httpBuilder.build()
+        val noCache = noCacheSet.contains(url)
         var result: String? = null
         val httpUrl: String = addParamToUrl(url, params)
         val request = Request.Builder()
             .url(httpUrl)
+            .cacheControl(if(noCache) CacheControl.FORCE_NETWORK else defaultCacheControl)
             .build()
         try {
             val response = httpClient.newCall(request).execute()
             if (response.isSuccessful) {
+                noCacheSet.remove(url)
                 result = response.body!!.string()
             }
         } catch (e: IOException) {

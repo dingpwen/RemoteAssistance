@@ -70,8 +70,9 @@ class UserModel:
     @staticmethod
     def get_reg_user(number, password):
         user = session.query(User).filter(User.number == number, User.password == password).first()
-        otk = user.token
+        otk = ""
         if user is not None:
+            otk = user.token
             user.token = Encode.generate_token()
             user.lt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             session.query(User).filter(User.number == number).update({User.token: user.token, User.lt: user.lt})

@@ -39,8 +39,9 @@ class FriendModel:
 
     @staticmethod
     def get_friend_by_sn(token, sn_list):
+        t_list = tuple([str(i) for i in sn_list.split(',')])
         return session.query(User).join(Friend, Friend.ftk == User.token)\
-            .filter(Friend.token == token, User.sn.in_(sn_list)).all()
+            .filter(Friend.token == token, User.sn.in_(t_list)).order_by(Friend.intimacy.desc()).all()
 
     @staticmethod
     def del_friend(token, ftk):
@@ -72,6 +73,7 @@ class FriendModel:
                 return -2, None
         if my_category == 2 and friend_category == 2:
             return -4, None
+        intimacy = 0
         if my_category == 1 and friend_category == 2:
             intimacy = 1
         adt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())

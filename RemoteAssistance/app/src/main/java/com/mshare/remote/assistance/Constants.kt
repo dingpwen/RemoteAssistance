@@ -14,7 +14,7 @@ object Constants{
     private const val SHARES_FILE = "assistance"
     //private const val SERVER_LOCAL_BASE = "://192.168.0.109:5000/"
     private const val SERVER_LOCAL_BASE = "://172.16.200.206:5000/"
-    private const val SERVER_REMOTE_BASE = "://121.36.10.45:5000/"
+    private const val SERVER_REMOTE_BASE = "://124.70.140.183:5000/"
     private const val WS_SERVER_LOCAL:String = "ws"+ SERVER_LOCAL_BASE + "socket"
     private const val WS_SERVER_REMOTE:String = "ws"+ SERVER_REMOTE_BASE + "socket"
     const val WS_MSG_COMMAND_SELF:String = "command"

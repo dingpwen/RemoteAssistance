@@ -1,7 +1,6 @@
 package com.mshare.remote.assistance.friend
 
 import android.app.ProgressDialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -30,8 +29,6 @@ import com.wen.app.update.ApkUtils
 import com.wen.app.update.UpdateVersionService
 import kotlinx.android.synthetic.main.activity_friend_list.*
 import kotlinx.coroutines.*
-import org.json.JSONException
-import org.json.JSONObject
 import wen.mmvm.arch.Result
 import java.lang.ref.WeakReference
 
@@ -141,10 +138,6 @@ class FriendListActivity : AppCompatActivity() {
                 android.R.color.holo_red_light, android.R.color.holo_orange_light,
                 android.R.color.holo_green_light)
         refreshLayout.isRefreshing = true
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 
     private fun setData(friendList: List<FriendEntity>?) = GlobalScope.launch(Dispatchers.Main){

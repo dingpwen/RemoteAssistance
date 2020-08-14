@@ -13,6 +13,7 @@ def user_to_json(user):
         user_json["number"] = user.number
         user_json["user_token"] = user.token
         user_json["imageUrl"] = user.image
+        user_json["sn"] = user.sn
     return user_json
 
 

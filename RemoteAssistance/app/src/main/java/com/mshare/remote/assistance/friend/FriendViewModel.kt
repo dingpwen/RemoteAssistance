@@ -6,9 +6,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import com.mshare.remote.assistance.Constants
 import com.mshare.remote.assistance.friend.model.FriendEntity
 import com.mshare.remote.assistance.friend.model.FriendRepository
 import com.mshare.remote.assistance.friend.model.VersionEntity
+import com.mshare.remote.assistance.util.OkHttpUtil
 import wen.mmvm.arch.Result
 
 class FriendViewModel(application: Application):AndroidViewModel(application) {
@@ -36,6 +38,7 @@ class FriendViewModel(application: Application):AndroidViewModel(application) {
         mCache?.addSource(addOrRemove) {
             mCache?.removeSource(addOrRemove)
             if(it is Result.Success) {
+                OkHttpUtil.addToNoCacheSet(Constants.getFriendListUrl())
                 val load = friendRepository.loadFriendsData()
                 mCache?.addSource(load) {loadData ->
                     mCache?.value = loadData

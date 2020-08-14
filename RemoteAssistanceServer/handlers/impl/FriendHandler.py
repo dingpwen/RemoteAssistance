@@ -2,7 +2,6 @@ from abc import ABC
 from handlers.base.BaseHandler import BaseHandler
 from models.friend import FriendModel
 from libs.hooks import check_token
-from models.user import User
 import json
 
 
@@ -27,6 +26,18 @@ def friend_to_json(friends):
         friend_json["number"] = friend.number
         friend_json["imageUrl"] = friend.image
         friend_json["intimacy"] = friend.intimacy
+        friend_array.append(friend_json)
+    return friend_array
+
+
+def friend_to_json2(friends):
+    friend_array = []
+    for friend in friends:
+        friend_json = dict()
+        friend_json["id"] = friend.fid
+        friend_json["name"] = friend.name
+        friend_json["user_token"] = friend.token
+        friend_json["number"] = friend.number
         friend_array.append(friend_json)
     return friend_array
 
@@ -117,12 +128,12 @@ class FriendHandler(BaseHandler, ABC):
         FriendModel.del_friend(token, ftk)
         result = dict()
         result["status"] = 200
-        result["msg"] = "add success"
+        result["msg"] = "delete success"
         self.write(json.dumps(result))
 
     async def update_intimacy(self, token, ftk, intimacy):
         FriendModel.update_intimacy(token, ftk, intimacy)
         result = dict()
         result["status"] = 200
-        result["msg"] = "add success"
+        result["msg"] = "update success"
         self.write(json.dumps(result))

@@ -21,8 +21,11 @@
               success:function(arg){
                   var obj = jQuery.parseJSON(arg);
                   console.log(obj.image);
+                  console.log(obj.qr_code);
+                  $('#result_image').show()
                    $('#result_image').attr("src", obj.image);
-                   $('#result_image').show()
+                   $('#qr_content').text(obj.qr_code);
+                   $('#result_qr').show()
               },
               error:function(){
                   console.log("failed");
@@ -46,10 +49,15 @@
 </textarea></td>
     </tr>
 
+    <tr hidden="hidden" id="result_qr">
+        <td width="126" align="center">二维码内容：</td>
+        <td  align="center" id="qr_content"></td>
+    </tr>
+
     <tr>
         <td width="126" align="center"><button type="button" onclick="doGenerate()">生成二维码</button></td>
         <td  align="center"><img src="../qr_image/default.jpg"  alt="生产的二维码" id="result_image" hidden="hidden"/>
-</textarea></td>
+        </td>
     </tr>
 
 </table>
